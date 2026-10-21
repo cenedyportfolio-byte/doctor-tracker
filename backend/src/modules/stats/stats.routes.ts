@@ -4,7 +4,7 @@ import { parse } from '../../lib/validation.js';
 import { getOverview, STATS_RANGES } from './stats.service.js';
 
 const overviewQuery = z.object({
-  range: z.enum(STATS_RANGES).default('12m'),
+  range: z.enum(STATS_RANGES).default('30d'),
 });
 
 export const statsRouter = Router();

@@ -5,15 +5,14 @@ import { TtlCache } from '../../lib/cache.js';
 import { Doctor } from '../doctors/doctor.model.js';
 import { Patient } from '../patients/patient.model.js';
 
-export const STATS_RANGES = ['30d', '90d', '6m', '12m'] as const;
+export const STATS_RANGES = ['7d', '30d', '90d'] as const;
 export type StatsRange = (typeof STATS_RANGES)[number];
-type Granularity = 'day' | 'week' | 'month';
+const RANGE_DAYS: Record<StatsRange, number> = { '7d': 7, '30d': 30, '90d': 90 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface Overview {
   range: StatsRange;
-  granularity: Granularity;
   generatedAt: string;
   totals: {
     doctors: number;
@@ -45,29 +44,9 @@ function startOfUtcDay(date: Date): Date {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
-function startOfUtcWeek(date: Date): Date {
-  const day = startOfUtcDay(date);
-  const offset = (day.getUTCDay() + 6) % 7; // Monday = 0
-  return new Date(day.getTime() - offset * DAY_MS);
-}
-
-function addBucket(date: Date, unit: Granularity): Date {
-  if (unit === 'day') return new Date(date.getTime() + DAY_MS);
-  if (unit === 'week') return new Date(date.getTime() + 7 * DAY_MS);
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1));
-}
-
-function resolveRange(range: StatsRange, now: Date) {
-  switch (range) {
-    case '30d':
-      return { unit: 'day' as const, start: startOfUtcDay(new Date(now.getTime() - 29 * DAY_MS)) };
-    case '90d':
-      return { unit: 'week' as const, start: startOfUtcWeek(new Date(now.getTime() - 89 * DAY_MS)) };
-    case '6m':
-      return { unit: 'month' as const, start: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 5, 1)) };
-    case '12m':
-      return { unit: 'month' as const, start: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1)) };
-  }
+/** Daily buckets: the last N days including today (UTC). */
+function resolveRange(range: StatsRange, now: Date): Date {
+  return startOfUtcDay(new Date(now.getTime() - (RANGE_DAYS[range] - 1) * DAY_MS));
 }
 
 function compare(current: number, previous: number): Comparison {
@@ -83,7 +62,7 @@ function compare(current: number, previous: number): Comparison {
 // ---------------------------------------------------------------------------------------------
 
 /** Admissions per bucket for the selected period, plus the previous period's total. */
-export function admissionsPipeline(unit: Granularity, start: Date, previousStart: Date, now: Date): PipelineStage[] {
+export function admissionsPipeline(start: Date, previousStart: Date, now: Date): PipelineStage[] {
   return [
     // Bounded by the { admissionDate: -1 } index; only two periods' worth of documents are read.
     { $match: { admissionDate: { $gte: previousStart, $lte: now } } },
@@ -94,7 +73,7 @@ export function admissionsPipeline(unit: Granularity, start: Date, previousStart
           {
             $group: {
               _id: {
-                $dateTrunc: { date: '$admissionDate', unit, timezone: 'UTC', startOfWeek: 'monday' },
+                $dateTrunc: { date: '$admissionDate', unit: 'day', timezone: 'UTC' },
               },
               admissions: { $sum: 1 },
               critical: { $sum: { $cond: [{ $eq: ['$condition', 'critical'] }, 1, 0] } },
@@ -107,11 +86,11 @@ export function admissionsPipeline(unit: Granularity, start: Date, previousStart
   ];
 }
 
-async function admissionsInPeriod(unit: Granularity, start: Date, previousStart: Date, now: Date) {
+async function admissionsInPeriod(start: Date, previousStart: Date, now: Date) {
   const [result] = await Patient.aggregate<{
     trend: Array<{ _id: Date; admissions: number; critical: number }>;
     previous: Array<{ count: number }>;
-  }>(admissionsPipeline(unit, start, previousStart, now));
+  }>(admissionsPipeline(start, previousStart, now));
 
   return {
     trend: result?.trend ?? [],
@@ -198,16 +177,16 @@ async function doctorDistributions(start: Date, previousStart: Date) {
 
 /** The selected period and the previous period of equal length. */
 export function resolvePeriod(range: StatsRange, now = new Date()) {
-  const { unit, start } = resolveRange(range, now);
+  const start = resolveRange(range, now);
   const previousStart = new Date(start.getTime() - (now.getTime() - start.getTime()));
-  return { unit, start, previousStart, now };
+  return { start, previousStart, now };
 }
 
 async function computeOverview(range: StatsRange): Promise<Overview> {
-  const { unit, start, previousStart, now } = resolvePeriod(range);
+  const { start, previousStart, now } = resolvePeriod(range);
 
   const [admissions, patients, doctors] = await Promise.all([
-    admissionsInPeriod(unit, start, previousStart, now),
+    admissionsInPeriod(start, previousStart, now),
     patientDistributions(),
     doctorDistributions(start, previousStart),
   ]);
@@ -215,7 +194,7 @@ async function computeOverview(range: StatsRange): Promise<Overview> {
   // Zero-fill so charts get a continuous axis.
   const trendByBucket = new Map(admissions.trend.map((row) => [row._id.getTime(), row]));
   const admissionsTrend: Overview['admissionsTrend'] = [];
-  for (let bucket = start; bucket <= now; bucket = addBucket(bucket, unit)) {
+  for (let bucket = start; bucket <= now; bucket = new Date(bucket.getTime() + DAY_MS)) {
     const row = trendByBucket.get(bucket.getTime());
     admissionsTrend.push({
       bucket: bucket.toISOString(),
@@ -237,7 +216,6 @@ async function computeOverview(range: StatsRange): Promise<Overview> {
 
   return {
     range,
-    granularity: unit,
     generatedAt: now.toISOString(),
     totals: {
       doctors: totalDoctors,

@@ -14,7 +14,6 @@ export interface Comparison {
 
 export interface Overview {
   range: StatsRange;
-  granularity: "day" | "week" | "month";
   generatedAt: string;
   totals: { doctors: number; patients: number; critical: number; avgPatientsPerDoctor: number };
   period: { admissions: Comparison; newDoctors: Comparison };

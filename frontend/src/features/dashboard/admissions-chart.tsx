@@ -7,13 +7,10 @@ import { axisTick, ChartTooltipCard } from "@/components/charts/chart-tooltip";
 import { formatCompact, formatDate } from "@/lib/utils";
 import type { Overview } from "./api";
 
-const BUCKET_FORMAT = {
-  day: { axis: "MMM d", tooltip: "EEEE, MMM d" },
-  week: { axis: "MMM d", tooltip: "'Week of' MMM d" },
-  month: { axis: "MMM", tooltip: "MMMM yyyy" },
-} as const;
+const AXIS_FORMAT = "MMM d";
+const TOOLTIP_FORMAT = "EEEE, MMM d";
 
-// UTC buckets from the API → label in UTC so a month never shifts into its neighbour.
+// UTC day buckets from the API → label in UTC so a day never shifts into its neighbour.
 function bucketLabel(bucket: string, pattern: string) {
   const date = new Date(bucket);
   return formatDate(new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()), pattern);
@@ -21,24 +18,20 @@ function bucketLabel(bucket: string, pattern: string) {
 
 interface AdmissionsChartProps {
   data: Overview["admissionsTrend"];
-  granularity: Overview["granularity"];
   rangeLabel: string;
   className?: string;
 }
 
 export const AdmissionsChart = memo(function AdmissionsChart({
   data,
-  granularity,
   rangeLabel,
   className,
 }: AdmissionsChartProps) {
-  const format = BUCKET_FORMAT[granularity];
-
   return (
     <ChartCard
       className={className}
       title="Admissions"
-      description={`Patients admitted per ${granularity}, ${rangeLabel}${granularity === "day" ? "" : ` · current ${granularity} to date`}`}
+      description={`Patients admitted per day, ${rangeLabel}`}
       legend={
         <div className="flex flex-wrap gap-4">
           <LegendItem color="var(--chart-1)" label="All admissions" />
@@ -49,7 +42,7 @@ export const AdmissionsChart = memo(function AdmissionsChart({
         <DataTable
           caption="Admissions over time"
           columns={["Period", "Admissions", "Critical"]}
-          rows={data.map((d) => [bucketLabel(d.bucket, format.tooltip), d.admissions, d.critical])}
+          rows={data.map((d) => [bucketLabel(d.bucket, TOOLTIP_FORMAT), d.admissions, d.critical])}
         />
       }
     >
@@ -69,7 +62,7 @@ export const AdmissionsChart = memo(function AdmissionsChart({
         <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
         <XAxis
           dataKey="bucket"
-          tickFormatter={(value: string) => bucketLabel(value, format.axis)}
+          tickFormatter={(value: string) => bucketLabel(value, AXIS_FORMAT)}
           tick={axisTick}
           tickLine={false}
           axisLine={{ stroke: "var(--chart-grid)" }}
@@ -89,11 +82,9 @@ export const AdmissionsChart = memo(function AdmissionsChart({
           content={({ active, payload }) => {
             const row = payload?.[0]?.payload as Overview["admissionsTrend"][number] | undefined;
             if (!active || !row) return null;
-            // The last bucket is the current, still-running period.
-            const inProgress = row.bucket === data[data.length - 1]?.bucket && granularity !== "day";
             return (
               <ChartTooltipCard
-                title={`${bucketLabel(row.bucket, format.tooltip)}${inProgress ? " (to date)" : ""}`}
+                title={bucketLabel(row.bucket, TOOLTIP_FORMAT)}
                 rows={[
                   { label: "Admissions", value: row.admissions, color: "var(--chart-1)" },
                   { label: "Critical", value: row.critical, color: "var(--status-critical)" },

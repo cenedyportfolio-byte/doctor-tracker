@@ -102,8 +102,8 @@ async function main() {
   }
 
   // Dashboard (GET /stats/overview) and doctor profile (GET /doctors/:id)
-  const { unit, start, previousStart, now } = stats.resolvePeriod('12m');
-  await row('Dashboard: admissions trend (12m)', Patient.aggregate(stats.admissionsPipeline(unit, start, previousStart, now)));
+  const { start, previousStart, now } = stats.resolvePeriod('90d');
+  await row('Dashboard: admissions trend (90d)', Patient.aggregate(stats.admissionsPipeline(start, previousStart, now)));
   await row('Dashboard: patient breakdowns', Patient.aggregate(stats.patientBreakdownPipeline()));
   await row('Dashboard: doctor breakdowns', Doctor.aggregate(stats.doctorBreakdownPipeline(start, previousStart)));
   await row('Doctor profile: patient mix', Patient.aggregate(doctorPatientMixPipeline(sample.doctor)));

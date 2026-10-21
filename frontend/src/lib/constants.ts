@@ -88,9 +88,8 @@ export const PATIENT_SORTS = [
 ] as const;
 
 export const STATS_RANGES = [
+  { value: "7d", label: "7D", description: "last 7 days" },
   { value: "30d", label: "30D", description: "last 30 days" },
   { value: "90d", label: "90D", description: "last 90 days" },
-  { value: "6m", label: "6M", description: "last 6 months" },
-  { value: "12m", label: "12M", description: "last 12 months" },
 ] as const;
 export type StatsRange = (typeof STATS_RANGES)[number]["value"];

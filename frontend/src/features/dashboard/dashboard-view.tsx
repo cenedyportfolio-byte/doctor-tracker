@@ -26,7 +26,7 @@ function greeting(hour: number) {
 
 export function DashboardView() {
   const { searchParams, update } = useUrlState();
-  const range = readEnum<StatsRange>(searchParams, "range", RANGE_VALUES, "12m");
+  const range = readEnum<StatsRange>(searchParams, "range", RANGE_VALUES, "30d");
   const rangeLabel = STATS_RANGES.find((r) => r.value === range)!.description;
   const { data, error, isPending, isPlaceholderData, refetch } = useOverview(range);
   const user = useCurrentUser();
@@ -46,7 +46,7 @@ export function DashboardView() {
           <SegmentedControl
             label="Time range"
             value={range}
-            onChange={(value) => update({ range: value === "12m" ? undefined : value })}
+            onChange={(value) => update({ range: value === "30d" ? undefined : value })}
             options={STATS_RANGES.map((r) => ({ value: r.value, label: r.label, title: `Show the ${r.description}` }))}
           />
         }
@@ -62,7 +62,7 @@ export function DashboardView() {
         <div className={cn("space-y-6 transition-opacity", isPlaceholderData && "opacity-60")} aria-busy={isPlaceholderData}>
           <KpiCards data={data} rangeLabel={rangeLabel} />
 
-          <AdmissionsChart data={data.admissionsTrend} granularity={data.granularity} rangeLabel={rangeLabel} />
+          <AdmissionsChart data={data.admissionsTrend} rangeLabel={rangeLabel} />
 
           <div className="grid gap-6 lg:grid-cols-2">
             <TopDoctorsChart data={data.topDoctors} />

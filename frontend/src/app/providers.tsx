@@ -24,7 +24,7 @@ export function Providers({ children }: { children: ReactNode }) {
         toastOptions={{
           classNames: {
             toast:
-              "!rounded-xl !border !border-border !bg-surface !text-foreground !shadow-overlay !font-sans",
+              "!rounded-md !border !border-border !bg-surface !text-foreground !shadow-overlay !font-sans",
             description: "!text-muted",
             closeButton: "!border-border !bg-surface !text-muted",
             success: "[&_[data-icon]]:!text-status-good",

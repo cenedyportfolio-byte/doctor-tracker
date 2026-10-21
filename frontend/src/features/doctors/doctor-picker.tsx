@@ -165,7 +165,7 @@ export function DoctorPicker({
           popover="manual"
           role="listbox"
           aria-label="Doctors"
-          className="fixed right-auto m-0 max-h-64 animate-fade-in overflow-y-auto rounded-xl border border-border bg-surface p-1 text-foreground shadow-overlay"
+          className="fixed right-auto m-0 max-h-64 animate-fade-in overflow-y-auto rounded-md border border-border bg-surface p-1 text-foreground shadow-overlay"
         >
           {options.length === 0 ? (
             <li className="px-3 py-6 text-center text-sm text-muted">
@@ -194,7 +194,7 @@ export function DoctorPicker({
                       {option.specialization} · {option.hospital}
                     </p>
                   </div>
-                  {selected && <Check className="size-4 text-primary" aria-hidden="true" />}
+                  {selected && <Check className="size-4 text-foreground" aria-hidden="true" />}
                 </li>
               );
             })

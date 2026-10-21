@@ -55,7 +55,7 @@ export function DoctorFiltersSheet({ open, onClose, initial, onApply }: DoctorFi
       ) : (
         <div className="space-y-2" aria-hidden="true">
           <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-8 w-full rounded-full" />
+          <Skeleton className="h-16 w-full" />
         </div>
       )}
 

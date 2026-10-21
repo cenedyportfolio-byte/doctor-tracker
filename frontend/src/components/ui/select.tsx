@@ -7,7 +7,7 @@ import { controlStyles } from "./input";
 export function Select({ className, children, ...props }: ComponentProps<"select">) {
   return (
     <div className={cn("relative", className)}>
-      <select className={cn(controlStyles, "h-10 cursor-pointer appearance-none pr-9")} {...props}>
+      <select className={cn(controlStyles, "h-9 cursor-pointer appearance-none pr-9")} {...props}>
         {children}
       </select>
       <ChevronDown

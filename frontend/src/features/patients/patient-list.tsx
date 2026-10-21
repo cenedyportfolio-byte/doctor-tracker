@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Plus, SearchX, SlidersHorizontal, UserPlus } from "lucide-react";
+import { Plus, SlidersHorizontal } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { describeDateRange } from "@/components/filters/date-range-filter";
@@ -22,7 +22,6 @@ import { errorMessage } from "@/lib/api-client";
 import { CONDITION_META, CONDITIONS_BY_SEVERITY, GENDER_LABEL, PATIENT_SORTS } from "@/lib/constants";
 import { cn, formatNumber } from "@/lib/utils";
 import { useDeletePatient, usePatients } from "./api";
-import { CONDITION_ICONS } from "./condition-badge";
 import { PatientFiltersSheet } from "./patient-filters-sheet";
 import { PatientFormDialog, type PatientFormState } from "./patient-form-dialog";
 import { PatientCardList, PatientRowsSkeleton, PatientsTable } from "./patient-rows";
@@ -170,7 +169,6 @@ export function PatientList({ doctor }: PatientListProps) {
             All
           </ConditionPill>
           {CONDITIONS_BY_SEVERITY.map((condition) => {
-            const Icon = CONDITION_ICONS[condition];
             const active = params.condition.length === 1 && params.condition[0] === condition;
             return (
               <ConditionPill
@@ -178,7 +176,6 @@ export function PatientList({ doctor }: PatientListProps) {
                 active={active}
                 onClick={() => update({ condition: active ? undefined : [condition] })}
               >
-                <Icon className="size-3.5" aria-hidden="true" />
                 {CONDITION_META[condition].label}
               </ConditionPill>
             );
@@ -241,7 +238,6 @@ export function PatientList({ doctor }: PatientListProps) {
           ) : patients.length === 0 ? (
             activeFilters.length > 0 ? (
               <EmptyState
-                icon={SearchX}
                 title="No patients match your filters"
                 description="Try a different search term or remove some filters."
                 action={
@@ -252,7 +248,6 @@ export function PatientList({ doctor }: PatientListProps) {
               />
             ) : (
               <EmptyState
-                icon={UserPlus}
                 title={scoped ? "No patients assigned yet" : "No patients yet"}
                 description={
                   scoped ? "Patients added under this doctor will appear here." : "Add a patient to get started."

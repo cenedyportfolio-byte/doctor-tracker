@@ -3,7 +3,8 @@
 import { subDays, subMonths } from "date-fns";
 import { useId } from "react";
 import { Input } from "@/components/ui/input";
-import { cn, formatDate, toDateInputValue } from "@/lib/utils";
+import { Select } from "@/components/ui/select";
+import { formatDate, toDateInputValue } from "@/lib/utils";
 
 export interface DateRange {
   from?: string;
@@ -35,24 +36,26 @@ export function DateRangeFilter({ label, value, onChange }: DateRangeFilterProps
   return (
     <fieldset>
       <legend className="mb-2 text-[13px] font-semibold text-foreground">{label}</legend>
-      <div className="mb-3 flex flex-wrap gap-2">
+      <Select
+        aria-label={`${label} preset`}
+        className="mb-3"
+        value={activePreset ?? (value.from || value.to ? "custom" : "")}
+        onChange={(e) => {
+          const preset = PRESETS.find((p) => p.id === e.target.value);
+          if (preset) onChange(presetRange(preset));
+          else if (e.target.value === "") onChange({});
+        }}
+      >
+        <option value="">Any time</option>
         {PRESETS.map((preset) => (
-          <button
-            key={preset.id}
-            type="button"
-            aria-pressed={activePreset === preset.id}
-            onClick={() => onChange(activePreset === preset.id ? {} : presetRange(preset))}
-            className={cn(
-              "h-8 cursor-pointer rounded-full border px-3 text-[13px] font-medium transition-colors",
-              activePreset === preset.id
-                ? "border-primary bg-primary-soft text-primary-soft-foreground"
-                : "border-border-strong text-muted hover:border-subtle hover:text-foreground",
-            )}
-          >
+          <option key={preset.id} value={preset.id}>
             {preset.label}
-          </button>
+          </option>
         ))}
-      </div>
+        <option value="custom" disabled>
+          Custom range
+        </option>
+      </Select>
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1 text-xs font-medium text-muted" htmlFor={`${id}-from`}>
           From

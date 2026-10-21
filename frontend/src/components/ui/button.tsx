@@ -3,21 +3,19 @@ import { cn } from "@/lib/utils";
 import { Spinner } from "./spinner";
 
 const VARIANTS = {
-  primary:
-    "bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover disabled:hover:bg-primary",
-  secondary:
-    "border border-border-strong bg-surface text-foreground shadow-sm hover:bg-surface-3 disabled:hover:bg-surface",
-  ghost: "text-muted hover:bg-surface-3 hover:text-foreground",
-  danger: "bg-danger text-white shadow-sm hover:bg-danger-hover disabled:hover:bg-danger",
+  primary: "bg-primary text-primary-foreground hover:bg-primary-hover disabled:hover:bg-primary",
+  secondary: "border border-border-strong bg-surface text-foreground hover:bg-surface-2 disabled:hover:bg-surface",
+  ghost: "text-muted hover:bg-surface-2 hover:text-foreground",
+  danger: "bg-danger text-white hover:bg-danger-hover disabled:hover:bg-danger",
   "danger-ghost": "text-danger-soft-foreground hover:bg-danger-soft",
 } as const;
 
 const SIZES = {
-  sm: "h-8 gap-1.5 rounded-lg px-3 text-[13px]",
-  md: "h-10 gap-2 rounded-xl px-4 text-sm",
-  lg: "h-11 gap-2 rounded-xl px-5 text-sm",
-  icon: "size-9 rounded-lg",
-  "icon-sm": "size-8 rounded-lg",
+  sm: "h-8 gap-1.5 rounded-md px-3 text-[13px]",
+  md: "h-9 gap-2 rounded-md px-3.5 text-sm",
+  lg: "h-10 gap-2 rounded-md px-4 text-sm",
+  icon: "size-9 rounded-md",
+  "icon-sm": "size-8 rounded-md",
 } as const;
 
 export type ButtonVariant = keyof typeof VARIANTS;
@@ -29,7 +27,7 @@ export function buttonVariants({
   className,
 }: { variant?: ButtonVariant; size?: ButtonSize; className?: string } = {}) {
   return cn(
-    "inline-flex shrink-0 cursor-pointer items-center justify-center font-semibold whitespace-nowrap transition-colors duration-150 select-none",
+    "inline-flex shrink-0 cursor-pointer items-center justify-center font-medium whitespace-nowrap transition-colors duration-150 select-none",
     "disabled:cursor-not-allowed disabled:opacity-55 [&_svg]:shrink-0",
     VARIANTS[variant],
     SIZES[size],

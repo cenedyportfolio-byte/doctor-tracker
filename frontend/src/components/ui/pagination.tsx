@@ -62,7 +62,7 @@ export const Pagination = memo(function Pagination({
           <select
             value={limit}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="h-8 cursor-pointer rounded-lg border border-border-strong bg-surface px-2 text-[13px] font-medium text-foreground"
+            className="h-8 cursor-pointer rounded-md border border-border-strong bg-surface px-2 text-[13px] text-foreground"
           >
             {PAGE_SIZES.map((size) => (
               <option key={size} value={size}>
@@ -98,10 +98,10 @@ export const Pagination = memo(function Pagination({
                   aria-current={item === page ? "page" : undefined}
                   aria-label={`Page ${item}`}
                   className={cn(
-                    "h-8 min-w-8 cursor-pointer rounded-lg px-2 text-[13px] font-semibold tabular-nums transition-colors",
+                    "h-8 min-w-8 cursor-pointer rounded-md px-2 text-[13px] tabular-nums transition-colors",
                     item === page
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted hover:bg-surface-3 hover:text-foreground",
+                      ? "border border-border-strong bg-surface font-semibold text-foreground"
+                      : "text-muted hover:bg-surface-2 hover:text-foreground",
                   )}
                 >
                   {item}

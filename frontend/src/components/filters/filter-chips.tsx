@@ -22,13 +22,13 @@ export function FilterChips({ filters, onClearAll }: FilterChipsProps) {
       {filters.map((filter) => (
         <span
           key={filter.key}
-          className="inline-flex h-7 items-center gap-1 rounded-full border border-border bg-surface-2 pr-1 pl-3 text-xs font-medium text-foreground"
+          className="inline-flex h-7 items-center gap-1 rounded-md border border-border bg-surface-2 pr-1 pl-2.5 text-xs text-foreground"
         >
           {filter.label}
           <button
             type="button"
             onClick={filter.onRemove}
-            className="flex size-5 cursor-pointer items-center justify-center rounded-full text-subtle hover:bg-surface-3 hover:text-foreground"
+            className="flex size-5 cursor-pointer items-center justify-center rounded text-subtle hover:bg-surface-3 hover:text-foreground"
             aria-label={`Remove filter: ${filter.label}`}
           >
             <X className="size-3" />
@@ -38,7 +38,7 @@ export function FilterChips({ filters, onClearAll }: FilterChipsProps) {
       <button
         type="button"
         onClick={onClearAll}
-        className="cursor-pointer px-1 text-xs font-semibold text-primary hover:underline"
+        className="cursor-pointer px-1 text-xs font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
       >
         Clear all
       </button>

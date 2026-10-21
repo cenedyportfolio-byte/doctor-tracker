@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { memo } from "react";
 import { ChartCard } from "@/components/charts/chart-card";
-import { CONDITION_ICONS } from "@/features/patients/condition-badge";
 import { CONDITION_META, CONDITIONS_BY_SEVERITY } from "@/lib/constants";
 import { formatNumber, formatPercent } from "@/lib/utils";
 import type { Overview } from "./api";
@@ -31,7 +30,6 @@ export const ConditionBreakdown = memo(function ConditionBreakdown({
       <ul className="space-y-4">
         {CONDITIONS_BY_SEVERITY.map((condition) => {
           const meta = CONDITION_META[condition];
-          const Icon = CONDITION_ICONS[condition];
           const count = counts.get(condition) ?? 0;
           const pct = share(count, total);
           return (
@@ -43,7 +41,6 @@ export const ConditionBreakdown = memo(function ConditionBreakdown({
               >
                 <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
                   <span className="inline-flex items-center gap-2 font-medium text-foreground group-hover:text-primary">
-                    <Icon className="size-4 text-subtle" aria-hidden="true" />
                     {meta.label}
                   </span>
                   <span className="text-muted tabular-nums">

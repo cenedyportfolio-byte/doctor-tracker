@@ -1,17 +1,6 @@
 "use client";
 
-import {
-  ArrowLeft,
-  Building2,
-  CalendarDays,
-  ChevronRight,
-  Clock,
-  Mail,
-  Pencil,
-  Phone,
-  Trash2,
-  UserX,
-} from "lucide-react";
+import { ArrowLeft, Building2, CalendarDays, ChevronRight, Clock, Mail, Pencil, Phone, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
@@ -22,7 +11,6 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState, ErrorState } from "@/components/ui/states";
 import { useCanEdit } from "@/features/auth/api";
-import { CONDITION_ICONS } from "@/features/patients/condition-badge";
 import { PatientList } from "@/features/patients/patient-list";
 import { ApiError } from "@/lib/api-client";
 import { CONDITION_META, CONDITIONS_BY_SEVERITY } from "@/lib/constants";
@@ -47,7 +35,6 @@ export function DoctorDetailView({ id }: { id: string }) {
       <Card>
         {notFound ? (
           <EmptyState
-            icon={UserX}
             title="Doctor not found"
             description="This doctor may have been removed, or the link is incorrect."
             action={
@@ -194,14 +181,12 @@ function ConditionBreakdown({ doctor }: { doctor: DoctorDetail }) {
           </div>
           <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {CONDITIONS_BY_SEVERITY.map((condition) => {
-              const Icon = CONDITION_ICONS[condition];
               const count = doctor.patientsByCondition[condition];
               return (
                 <li key={condition} className="flex items-center gap-2.5 rounded-xl bg-surface-2 px-3 py-2.5 ring-1 ring-border">
                   <span className="size-2.5 shrink-0 rounded-full" style={{ background: CONDITION_META[condition].chartColor }} />
                   <div className="min-w-0">
                     <p className="flex items-center gap-1 text-xs text-muted">
-                      <Icon className="size-3 shrink-0" aria-hidden="true" />
                       <span className="truncate">{CONDITION_META[condition].label}</span>
                     </p>
                     <p className="text-sm font-semibold text-foreground tabular-nums">

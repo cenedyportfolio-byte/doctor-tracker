@@ -73,7 +73,7 @@ export function Dialog({
       }}
       className={cn(
         "m-0 h-dvh max-h-none w-full max-w-none bg-transparent p-0 text-foreground",
-        "backdrop:bg-slate-950/45 backdrop:backdrop-blur-[2px] open:flex",
+        "backdrop:bg-black/40 open:flex",
         isSheet ? "items-end justify-end sm:items-stretch" : "items-end justify-center sm:items-center sm:p-6",
       )}
     >
@@ -82,8 +82,8 @@ export function Dialog({
           className={cn(
             "flex max-h-[92dvh] w-full flex-col bg-surface shadow-overlay",
             isSheet
-              ? "animate-slide-in-up rounded-t-3xl sm:h-dvh sm:max-h-none sm:max-w-md sm:animate-slide-in-right sm:rounded-none sm:rounded-l-3xl"
-              : cn("animate-slide-in-up rounded-t-3xl sm:animate-scale-in sm:rounded-2xl", MODAL_SIZES[size]),
+              ? "animate-slide-in-up rounded-t-lg sm:h-dvh sm:max-h-none sm:max-w-md sm:animate-slide-in-right sm:rounded-none"
+              : cn("animate-slide-in-up rounded-t-lg sm:animate-scale-in sm:rounded-lg", MODAL_SIZES[size]),
           )}
         >
           <header className="flex items-start justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">

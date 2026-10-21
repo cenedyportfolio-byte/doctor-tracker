@@ -66,7 +66,7 @@ export function SearchInput({
         }}
         placeholder={placeholder}
         aria-label={label}
-        className={cn(controlStyles, "h-10 pr-9 pl-9 [&::-webkit-search-cancel-button]:hidden")}
+        className={cn(controlStyles, "h-9 pr-9 pl-9 [&::-webkit-search-cancel-button]:hidden")}
       />
       {value && (
         <button

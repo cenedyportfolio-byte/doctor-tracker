@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, SearchX, SlidersHorizontal, Stethoscope } from "lucide-react";
+import { Plus, SlidersHorizontal } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { describeDateRange } from "@/components/filters/date-range-filter";
 import { FilterChips, type ActiveFilter } from "@/components/filters/filter-chips";
@@ -172,7 +172,6 @@ export function DoctorsView() {
           ) : doctors.length === 0 ? (
             activeFilters.length > 0 ? (
               <EmptyState
-                icon={SearchX}
                 title="No doctors match your filters"
                 description="Try a different search term or remove some filters."
                 action={
@@ -183,7 +182,6 @@ export function DoctorsView() {
               />
             ) : (
               <EmptyState
-                icon={Stethoscope}
                 title="No doctors yet"
                 description="Add the first doctor to start tracking their patients."
                 action={

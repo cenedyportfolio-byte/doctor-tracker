@@ -48,7 +48,7 @@ export const CONDITION_META: Record<
     label: "Recovering",
     tone: "info",
     description: "Improving after treatment",
-    chartColor: "var(--chart-1)",
+    chartColor: "var(--status-info)",
   },
   discharged: {
     label: "Discharged",

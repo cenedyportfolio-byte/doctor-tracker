@@ -16,7 +16,9 @@
     "explain": "tsx --env-file-if-exists=.env src/scripts/explain-queries.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "seed:prod": "node --env-file-if-exists=.env dist/scripts/seed.js"
+    "seed:prod": "node --env-file-if-exists=.env dist/scripts/seed.js",
+    "db:sync-indexes": "tsx --env-file-if-exists=.env src/scripts/sync-indexes.ts",
+    "db:sync-indexes:prod": "node --env-file-if-exists=.env dist/scripts/sync-indexes.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

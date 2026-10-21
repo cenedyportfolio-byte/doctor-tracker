@@ -125,7 +125,8 @@ export function DoctorsView() {
             canEdit && (
               <Button onClick={() => setForm({ mode: "create" })}>
                 <Plus className="size-4" />
-                Add doctor
+                <span className="sm:hidden">Add</span>
+                <span className="hidden sm:inline">Add doctor</span>
               </Button>
             )
           }

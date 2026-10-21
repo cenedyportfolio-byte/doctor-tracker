@@ -91,7 +91,7 @@ const DoctorRow = memo(function DoctorRow({
         >
           {doctor.name}
         </Link>
-        <p className="max-w-56 truncate text-xs text-muted">
+        <p className="max-w-40 truncate text-xs text-muted sm:max-w-56">
           <span className="md:hidden">{doctor.specialization}</span>
           <span className="hidden md:inline">{doctor.email}</span>
         </p>

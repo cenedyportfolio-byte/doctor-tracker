@@ -3,9 +3,7 @@
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { memo } from "react";
-import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { SortableTh, Table, Td, Th, THead, Tr } from "@/components/ui/table";
 import { GENDER_LABEL } from "@/lib/constants";
 import { cn, formatDate, formatRelative } from "@/lib/utils";
@@ -15,6 +13,7 @@ import type { Patient, PatientSort } from "./types";
 interface RowActions {
   canEdit: boolean;
   showDoctor: boolean;
+  onOpen: (patient: Patient) => void;
   onEdit: (patient: Patient) => void;
   onDelete: (patient: Patient) => void;
 }
@@ -26,6 +25,11 @@ interface PatientsTableProps extends RowActions {
   dimmed?: boolean;
 }
 
+/**
+ * Columns appear as space allows: phones show patient + condition (tap a row for the details
+ * drawer, which holds edit/delete); wider screens add admission date, actions, doctor and a
+ * separate diagnosis column.
+ */
 export function PatientsTable({ patients, sort, onSortChange, dimmed, ...actions }: PatientsTableProps) {
   const nameDirection = sort === "name_asc" ? "asc" : sort === "name_desc" ? "desc" : null;
   const admittedDirection = sort === "newest" ? "desc" : sort === "oldest" ? "asc" : null;
@@ -40,18 +44,18 @@ export function PatientsTable({ patients, sort, onSortChange, dimmed, ...actions
           >
             Patient
           </SortableTh>
-          <Th>Age · Gender</Th>
-          <Th>Diagnosis</Th>
+          <Th className="hidden min-[1400px]:table-cell">Diagnosis</Th>
           <Th>Condition</Th>
-          {actions.showDoctor && <Th>Doctor</Th>}
+          {actions.showDoctor && <Th className="hidden xl:table-cell">Doctor</Th>}
           <SortableTh
+            className="hidden md:table-cell"
             direction={admittedDirection}
             onSort={() => onSortChange(sort === "newest" ? "oldest" : "newest")}
           >
             Admitted
           </SortableTh>
           {actions.canEdit && (
-            <Th>
+            <Th className="hidden md:table-cell">
               <span className="sr-only">Actions</span>
             </Th>
           )}
@@ -70,34 +74,35 @@ const PatientRow = memo(function PatientRow({
   patient,
   canEdit,
   showDoctor,
+  onOpen,
   onEdit,
   onDelete,
 }: RowActions & { patient: Patient }) {
   return (
-    <Tr className="group">
+    <Tr className="relative">
       <Td>
-        <div className="flex items-center gap-3">
-          <Avatar name={patient.name} />
-          <div className="min-w-0">
-            <p className="font-semibold text-foreground">{patient.name}</p>
-            <p className="max-w-52 truncate text-xs text-muted">{patient.email ?? patient.phone}</p>
-          </div>
-        </div>
+        {/* The button stretches over the whole row; links and actions sit above it. */}
+        <button
+          type="button"
+          onClick={() => onOpen(patient)}
+          className="cursor-pointer text-left font-medium text-foreground after:absolute after:inset-0 hover:underline"
+        >
+          {patient.name}
+        </button>
+        <p className="max-w-40 truncate text-xs text-muted sm:max-w-56">
+          <span className="tabular-nums">{patient.age}</span> · {GENDER_LABEL[patient.gender]}
+          <span className="min-[1400px]:hidden"> · {patient.diagnosis}</span>
+        </p>
       </Td>
-      <Td className="whitespace-nowrap text-muted">
-        <span className="font-medium text-foreground tabular-nums">{patient.age}</span> · {GENDER_LABEL[patient.gender]}
-      </Td>
-      <Td className="max-w-48 truncate text-foreground">{patient.diagnosis}</Td>
+      <Td className="hidden max-w-48 truncate text-foreground min-[1400px]:table-cell">{patient.diagnosis}</Td>
       <Td>
         <ConditionBadge condition={patient.condition} />
       </Td>
       {showDoctor && (
-        <Td>
+        <Td className="hidden xl:table-cell">
           {patient.doctor ? (
-            <Link href={`/doctors/${patient.doctor.id}`} className="group/doc block max-w-44">
-              <span className="block truncate font-medium text-foreground group-hover/doc:text-primary">
-                {patient.doctor.name}
-              </span>
+            <Link href={`/doctors/${patient.doctor.id}`} className="relative z-10 block max-w-44 hover:underline">
+              <span className="block truncate text-foreground">{patient.doctor.name}</span>
               <span className="block truncate text-xs text-muted">{patient.doctor.specialization}</span>
             </Link>
           ) : (
@@ -105,13 +110,13 @@ const PatientRow = memo(function PatientRow({
           )}
         </Td>
       )}
-      <Td className="whitespace-nowrap">
+      <Td className="hidden whitespace-nowrap md:table-cell">
         <p className="text-foreground">{formatDate(patient.admissionDate)}</p>
         <p className="text-xs text-muted">{formatRelative(patient.admissionDate)}</p>
       </Td>
       {canEdit && (
-        <Td>
-          <div className="flex justify-end gap-1 opacity-100 transition-opacity lg:opacity-0 lg:group-focus-within:opacity-100 lg:group-hover:opacity-100">
+        <Td className="hidden md:table-cell">
+          <div className="relative z-10 flex justify-end gap-1">
             <Button variant="ghost" size="icon-sm" onClick={() => onEdit(patient)} aria-label={`Edit ${patient.name}`}>
               <Pencil className="size-4" />
             </Button>
@@ -129,85 +134,3 @@ const PatientRow = memo(function PatientRow({
     </Tr>
   );
 });
-
-export function PatientCardList({ patients, dimmed, ...actions }: RowActions & { patients: Patient[]; dimmed?: boolean }) {
-  return (
-    <ul className={cn("divide-y divide-border transition-opacity", dimmed && "opacity-60")}>
-      {patients.map((patient) => (
-        <PatientCard key={patient.id} patient={patient} {...actions} />
-      ))}
-    </ul>
-  );
-}
-
-const PatientCard = memo(function PatientCard({
-  patient,
-  canEdit,
-  showDoctor,
-  onEdit,
-  onDelete,
-}: RowActions & { patient: Patient }) {
-  return (
-    <li className="px-4 py-4">
-      <div className="flex items-start gap-3">
-        <Avatar name={patient.name} />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="truncate font-semibold text-foreground">{patient.name}</p>
-              <p className="text-xs text-muted">
-                {patient.age} · {GENDER_LABEL[patient.gender]} · {patient.diagnosis}
-              </p>
-            </div>
-            <ConditionBadge condition={patient.condition} />
-          </div>
-          <div className="mt-2 flex items-center justify-between gap-2 text-xs text-muted">
-            <span className="min-w-0 truncate">
-              {showDoctor && patient.doctor ? (
-                <Link href={`/doctors/${patient.doctor.id}`} className="font-medium text-foreground hover:text-primary">
-                  {patient.doctor.name}
-                </Link>
-              ) : null}
-              {showDoctor && patient.doctor ? " · " : ""}
-              Admitted {formatDate(patient.admissionDate, "MMM d")}
-            </span>
-            {canEdit && (
-              <span className="-my-1 -mr-1 flex shrink-0 gap-0.5">
-                <Button variant="ghost" size="icon-sm" onClick={() => onEdit(patient)} aria-label={`Edit ${patient.name}`}>
-                  <Pencil className="size-4" />
-                </Button>
-                <Button
-                  variant="danger-ghost"
-                  size="icon-sm"
-                  onClick={() => onDelete(patient)}
-                  aria-label={`Delete ${patient.name}`}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-    </li>
-  );
-});
-
-export function PatientRowsSkeleton({ rows = 8 }: { rows?: number }) {
-  return (
-    <div className="divide-y divide-border" aria-label="Loading patients" role="status">
-      {Array.from({ length: rows }, (_, i) => (
-        <div key={i} className="flex items-center gap-4 px-5 py-3.5">
-          <Skeleton className="size-10 rounded-full" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-3.5 w-36" />
-            <Skeleton className="h-3 w-48" />
-          </div>
-          <Skeleton className="hidden h-3.5 w-28 md:block" />
-          <Skeleton className="hidden h-5 w-24 rounded-full md:block" />
-          <Skeleton className="hidden h-3.5 w-32 lg:block" />
-        </div>
-      ))}
-    </div>
-  );
-}

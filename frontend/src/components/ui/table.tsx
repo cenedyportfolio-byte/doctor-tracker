@@ -20,7 +20,7 @@ export function Th({ className, ...props }: ComponentProps<"th">) {
     <th
       scope="col"
       className={cn(
-        "h-10 px-4 text-xs font-semibold tracking-wide whitespace-nowrap text-muted first:pl-5 last:pr-5",
+        "h-10 px-2.5 text-xs font-semibold tracking-wide whitespace-nowrap text-muted first:pl-4 last:pr-4 sm:px-3 sm:first:pl-5 sm:last:pr-5",
         className,
       )}
       {...props}
@@ -59,7 +59,7 @@ export function SortableTh({ children, direction, onSort, className }: SortableT
 }
 
 export function Td({ className, ...props }: ComponentProps<"td">) {
-  return <td className={cn("px-4 py-3 align-middle first:pl-5 last:pr-5", className)} {...props} />;
+  return <td className={cn("px-2.5 py-3 align-middle first:pl-4 last:pr-4 sm:px-3 sm:first:pl-5 sm:last:pr-5", className)} {...props} />;
 }
 
 export function Tr({ className, ...props }: ComponentProps<"tr">) {

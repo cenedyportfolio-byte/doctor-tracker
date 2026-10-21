@@ -56,7 +56,7 @@ export function ListToolbar<S extends string>({
         aria-label={sortLabel}
         value={sort}
         onChange={(e) => onSortChange(e.target.value as S)}
-        className="w-40"
+        className="w-36 sm:w-40"
       >
         {sortOptions.map((option) => (
           <option key={option.value} value={option.value}>

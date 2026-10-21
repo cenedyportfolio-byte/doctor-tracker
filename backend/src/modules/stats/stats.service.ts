@@ -26,7 +26,7 @@ export interface Overview {
   };
   admissionsTrend: Array<{ bucket: string; admissions: number; critical: number }>;
   patientsByCondition: Array<{ condition: PatientCondition; count: number }>;
-  topDoctors: Array<{ id: string; name: string; specialization: string; hospital: string; patients: number; critical: number }>;
+  topDoctors: Array<{ id: string; name: string; specialization: string; hospital: string; patients: number }>;
 }
 
 interface Comparison {
@@ -98,50 +98,45 @@ async function admissionsInPeriod(start: Date, previousStart: Date, now: Date) {
   };
 }
 
-/** Whole-population breakdowns computed in a single collection pass via $facet. */
-export function patientBreakdownPipeline(): PipelineStage[] {
+/**
+ * Patients per condition. Sorting on `condition` first lets MongoDB answer this from the
+ * { condition, admissionDate, _id } index alone (covered scan, no documents read).
+ */
+export function conditionCountsPipeline(): PipelineStage[] {
+  return [{ $sort: { condition: 1 } }, { $group: { _id: '$condition', count: { $sum: 1 } } }];
+}
+
+/** Top 10 doctors by patient count, counted from the { doctor, ... } index alone. */
+export function patientsPerDoctorPipeline(): PipelineStage[] {
   return [
+    { $sort: { doctor: 1 } },
+    { $group: { _id: '$doctor', patients: { $sum: 1 } } },
+    { $sort: { patients: -1, _id: 1 } },
+    { $limit: 10 },
+    // Join after $limit, so only 10 doctor lookups happen.
     {
-      $facet: {
-        byCondition: [{ $group: { _id: '$condition', count: { $sum: 1 } } }],
-        topDoctors: [
-          {
-            $group: {
-              _id: '$doctor',
-              patients: { $sum: 1 },
-              critical: { $sum: { $cond: [{ $eq: ['$condition', 'critical'] }, 1, 0] } },
-            },
-          },
-          { $sort: { patients: -1, _id: 1 } },
-          { $limit: 10 },
-          // Join after $limit, so only 10 doctor lookups happen.
-          {
-            $lookup: {
-              from: 'doctors',
-              localField: '_id',
-              foreignField: '_id',
-              as: 'doctor',
-              pipeline: [{ $project: { name: 1, specialization: 1, hospital: 1 } }],
-            },
-          },
-          { $unwind: '$doctor' },
-        ],
+      $lookup: {
+        from: 'doctors',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'doctor',
+        pipeline: [{ $project: { name: 1, specialization: 1, hospital: 1 } }],
       },
     },
+    { $unwind: '$doctor' },
   ];
 }
 
 async function patientDistributions() {
-  const [result] = await Patient.aggregate<{
-    byCondition: Array<{ _id: PatientCondition; count: number }>;
-    topDoctors: Array<{
+  const [byCondition, topDoctors] = await Promise.all([
+    Patient.aggregate<{ _id: PatientCondition; count: number }>(conditionCountsPipeline()),
+    Patient.aggregate<{
       _id: Types.ObjectId;
       patients: number;
-      critical: number;
       doctor: { name: string; specialization: string; hospital: string };
-    }>;
-  }>(patientBreakdownPipeline());
-  return result;
+    }>(patientsPerDoctorPipeline()),
+  ]);
+  return { byCondition, topDoctors };
 }
 
 /** Total doctors plus new-doctor counts for the current and previous period. */
@@ -204,7 +199,7 @@ async function computeOverview(range: StatsRange): Promise<Overview> {
   }
   const currentAdmissions = admissionsTrend.reduce((sum, row) => sum + row.admissions, 0);
 
-  const conditionCounts = new Map(patients?.byCondition.map((r) => [r._id, r.count]));
+  const conditionCounts = new Map(patients.byCondition.map((r) => [r._id, r.count]));
   const patientsByCondition = PATIENT_CONDITIONS.map((condition) => ({
     condition,
     count: conditionCounts.get(condition) ?? 0,
@@ -229,13 +224,12 @@ async function computeOverview(range: StatsRange): Promise<Overview> {
     },
     admissionsTrend,
     patientsByCondition,
-    topDoctors: (patients?.topDoctors ?? []).map((row) => ({
+    topDoctors: patients.topDoctors.map((row) => ({
       id: String(row._id),
       name: row.doctor.name,
       specialization: row.doctor.specialization,
       hospital: row.doctor.hospital,
       patients: row.patients,
-      critical: row.critical,
     })),
   };
 }

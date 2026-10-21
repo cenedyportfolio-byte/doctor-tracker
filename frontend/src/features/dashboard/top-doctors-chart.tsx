@@ -25,8 +25,8 @@ export const TopDoctorsChart = memo(function TopDoctorsChart({ data }: { data: O
       table={
         <DataTable
           caption="Patients per doctor"
-          columns={["Doctor", "Patients", "Critical"]}
-          rows={data.map((d) => [d.name, d.patients, d.critical])}
+          columns={["Doctor", "Patients"]}
+          rows={data.map((d) => [d.name, d.patients])}
         />
       }
     >
@@ -63,7 +63,6 @@ export const TopDoctorsChart = memo(function TopDoctorsChart({ data }: { data: O
                   title={row.name}
                   rows={[
                     { label: "Patients", value: row.patients, color: "var(--chart-1)" },
-                    { label: "Critical", value: row.critical },
                   ]}
                   footer={`${row.specialization} · ${row.hospital}`}
                 />

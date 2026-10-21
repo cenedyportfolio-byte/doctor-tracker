@@ -25,7 +25,6 @@ export interface Overview {
     specialization: Specialization;
     hospital: string;
     patients: number;
-    critical: number;
   }>;
 }
 

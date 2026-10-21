@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "./skeleton";
 
 export function Table({ className, ...props }: ComponentProps<"table">) {
   return (
@@ -67,5 +68,23 @@ export function Tr({ className, ...props }: ComponentProps<"tr">) {
       className={cn("border-b border-border transition-colors last:border-b-0 hover:bg-surface-2", className)}
       {...props}
     />
+  );
+}
+
+/** Placeholder rows shown while a list loads; mirrors the table's row height. */
+export function TableSkeleton({ rows = 8, label }: { rows?: number; label: string }) {
+  return (
+    <div className="divide-y divide-border border-t border-border" role="status" aria-label={label}>
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="flex items-center gap-6 px-4 py-3.5 sm:px-5">
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-3.5 w-40 max-w-full" />
+            <Skeleton className="h-3 w-56 max-w-full" />
+          </div>
+          <Skeleton className="hidden h-3.5 w-32 md:block" />
+          <Skeleton className="h-3.5 w-12" />
+        </div>
+      ))}
+    </div>
   );
 }

@@ -17,7 +17,7 @@ const MAX_TERM_LENGTH = 40;
 // A one-letter prefix matches most keywords, so the index can't narrow anything; skip it.
 const MIN_TERM_LENGTH = 2;
 
-export function normalize(value: string): string {
+function normalize(value: string): string {
   return value
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')

@@ -44,7 +44,7 @@ export const updatePatientBody = z
   .strict()
   .refine((body) => Object.keys(body).length > 0, 'Provide at least one field to update');
 
-export const PATIENT_SORTS = ['newest', 'oldest', 'name_asc', 'name_desc'] as const;
+const PATIENT_SORTS = ['newest', 'oldest', 'name_asc', 'name_desc'] as const;
 
 export const listPatientsQuery = z
   .object({

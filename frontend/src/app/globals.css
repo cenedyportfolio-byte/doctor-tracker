@@ -31,19 +31,9 @@
   --danger-hover: #b91c1c;
   --danger-soft: #fef2f2;
   --danger-soft-foreground: #b91c1c;
-  --warning-soft: #fff8e6;
-  --warning-soft-foreground: #a3510a;
-  --success-soft: #ebfaf2;
-  --success-soft-foreground: #047857;
-  --info-soft: #eef4ff;
-  --info-soft-foreground: #1d4ed8;
-  --neutral-soft: #f4f4f5;
-  --neutral-soft-foreground: #52525b;
 
   /* Data: neutral marks; status colors only where a value means a patient state */
   --chart-1: #3f3f46;
-  --chart-2: #a1a1aa;
-  --chart-3: #71717a;
   --chart-grid: #ededf0;
   --chart-axis: #d4d4d8;
   --status-good: #16a34a;
@@ -52,7 +42,6 @@
   --status-info: #2563eb;
   --status-neutral: #a1a1aa;
 
-  --shadow-card: none;
   /* Elevation for things that float above the page (dialogs, menus, popovers). */
   --shadow-overlay: 0 10px 30px -8px rgb(0 0 0 / 0.18), 0 2px 6px rgb(0 0 0 / 0.06);
 }
@@ -79,18 +68,8 @@
   --color-danger-hover: var(--danger-hover);
   --color-danger-soft: var(--danger-soft);
   --color-danger-soft-foreground: var(--danger-soft-foreground);
-  --color-warning-soft: var(--warning-soft);
-  --color-warning-soft-foreground: var(--warning-soft-foreground);
-  --color-success-soft: var(--success-soft);
-  --color-success-soft-foreground: var(--success-soft-foreground);
-  --color-info-soft: var(--info-soft);
-  --color-info-soft-foreground: var(--info-soft-foreground);
-  --color-neutral-soft: var(--neutral-soft);
-  --color-neutral-soft-foreground: var(--neutral-soft-foreground);
 
   --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
   --color-chart-grid: var(--chart-grid);
   --color-status-good: var(--status-good);
   --color-status-warning: var(--status-warning);
@@ -98,7 +77,6 @@
   --color-status-info: var(--status-info);
   --color-status-neutral: var(--status-neutral);
 
-  --shadow-card: var(--shadow-card);
   --shadow-overlay: var(--shadow-overlay);
 
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;

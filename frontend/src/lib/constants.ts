@@ -17,43 +17,29 @@ export const SPECIALIZATIONS = [
 ] as const;
 export type Specialization = (typeof SPECIALIZATIONS)[number];
 
-export type Tone = "success" | "info" | "warning" | "danger" | "neutral";
-
 export const CONDITIONS = ["stable", "under_observation", "critical", "recovering", "discharged"] as const;
 export type Condition = (typeof CONDITIONS)[number];
 
-export const CONDITION_META: Record<
-  Condition,
-  { label: string; tone: Tone; description: string; chartColor: string }
-> = {
+/** Label and status colour (dots in tables, bars on the dashboard) per condition. */
+export const CONDITION_META: Record<Condition, { label: string; chartColor: string }> = {
   critical: {
     label: "Critical",
-    tone: "danger",
-    description: "Needs immediate attention",
     chartColor: "var(--status-critical)",
   },
   under_observation: {
     label: "Under observation",
-    tone: "warning",
-    description: "Being monitored",
     chartColor: "var(--status-warning)",
   },
   stable: {
     label: "Stable",
-    tone: "success",
-    description: "Vitals within normal range",
     chartColor: "var(--status-good)",
   },
   recovering: {
     label: "Recovering",
-    tone: "info",
-    description: "Improving after treatment",
     chartColor: "var(--status-info)",
   },
   discharged: {
     label: "Discharged",
-    tone: "neutral",
-    description: "Treatment completed",
     chartColor: "var(--status-neutral)",
   },
 };

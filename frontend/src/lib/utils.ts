@@ -42,19 +42,7 @@ export function toDateInputValue(value: string | Date = new Date()): string {
   return date ? format(date, "yyyy-MM-dd") : "";
 }
 
-export function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  const first = parts[0]?.[0] ?? "";
-  const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
-  return (first + last).toUpperCase();
-}
 
-/** Stable small hash, used to give each entity a consistent avatar tint. */
-export function hashString(value: string): number {
-  let hash = 0;
-  for (let i = 0; i < value.length; i++) hash = (hash * 31 + value.charCodeAt(i)) | 0;
-  return Math.abs(hash);
-}
 
 export function pluralize(count: number, singular: string, plural = `${singular}s`): string {
   return `${formatNumber(count)} ${count === 1 ? singular : plural}`;

@@ -14,7 +14,7 @@ export const authKeys = {
   session: ["auth", "session"] as const,
 };
 
-export function useSession() {
+function useSession() {
   return useQuery({
     queryKey: authKeys.session,
     queryFn: ({ signal }) => api<DataResponse<{ user: SessionUser }>>("/auth/me", { signal }),

@@ -4,7 +4,7 @@ import { buttonVariants } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: { absolute: "Doctor Tracker" },
-  description: "Admin tool for managing doctors, their patients and admissions.",
+  description: "Secure administrative app for managing doctors and their patients, with analytics.",
 };
 
 // Each section describes a screen that exists in the app, in the terms the app uses.
@@ -51,8 +51,8 @@ export default function LandingPage() {
       <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
         <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">Doctor Tracker</h1>
         <p className="mt-3 max-w-2xl text-base text-muted">
-          An admin tool for hospital staff to keep track of doctors, the patients under their care, and
-          admissions over time.
+          A secure administrative app for managing doctors and the patients under their care, with a
+          dashboard that charts admissions, patient load per doctor and patient conditions.
         </p>
         <Link href="/login" className={buttonVariants({ className: "mt-6" })}>
           Sign in

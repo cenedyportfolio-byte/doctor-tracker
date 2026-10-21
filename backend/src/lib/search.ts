@@ -20,7 +20,7 @@ const MIN_TERM_LENGTH = 2;
 function normalize(value: string): string {
   return value
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '') // combining accents left by NFD
     .toLowerCase()
     .trim();
 }

@@ -12,9 +12,8 @@ import { STATS_RANGES, type StatsRange } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { AdmissionsChart } from "./admissions-chart";
 import { useOverview } from "./api";
-import { ConditionBreakdown, Demographics, SpecializationBreakdown } from "./distribution-cards";
+import { ConditionBreakdown } from "./condition-breakdown";
 import { KpiCards, KpiCardsSkeleton } from "./kpi-cards";
-import { RecentAdmissions } from "./recent-admissions";
 import { TopDoctorsChart } from "./top-doctors-chart";
 
 const RANGE_VALUES = STATS_RANGES.map((r) => r.value);
@@ -63,24 +62,11 @@ export function DashboardView() {
         <div className={cn("space-y-6 transition-opacity", isPlaceholderData && "opacity-60")} aria-busy={isPlaceholderData}>
           <KpiCards data={data} rangeLabel={rangeLabel} />
 
-          <div className="grid gap-6 xl:grid-cols-3">
-            <AdmissionsChart
-              data={data.admissionsTrend}
-              granularity={data.granularity}
-              rangeLabel={rangeLabel}
-              className="xl:col-span-2"
-            />
-            <RecentAdmissions data={data.recentPatients} />
-          </div>
+          <AdmissionsChart data={data.admissionsTrend} granularity={data.granularity} rangeLabel={rangeLabel} />
 
           <div className="grid gap-6 lg:grid-cols-2">
             <TopDoctorsChart data={data.topDoctors} />
-            <SpecializationBreakdown data={data.specializations} />
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-3">
             <ConditionBreakdown data={data.patientsByCondition} />
-            <Demographics ageGroups={data.ageGroups} genders={data.patientsByGender} className="lg:col-span-2" />
           </div>
         </div>
       ) : null}

@@ -106,7 +106,6 @@ async function main() {
   await row('Dashboard: admissions trend (12m)', Patient.aggregate(stats.admissionsPipeline(unit, start, previousStart, now)));
   await row('Dashboard: patient breakdowns', Patient.aggregate(stats.patientBreakdownPipeline()));
   await row('Dashboard: doctor breakdowns', Doctor.aggregate(stats.doctorBreakdownPipeline(start, previousStart)));
-  await row('Dashboard: recent admissions', stats.recentAdmissionsQuery());
   await row('Doctor profile: patient mix', Patient.aggregate(doctorPatientMixPipeline(sample.doctor)));
 
   await disconnectDatabase();

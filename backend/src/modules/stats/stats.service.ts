@@ -1,11 +1,5 @@
 import type { PipelineStage, Types } from 'mongoose';
-import {
-  GENDERS,
-  PATIENT_CONDITIONS,
-  SPECIALIZATIONS,
-  type Gender,
-  type PatientCondition,
-} from '../../config/constants.js';
+import { PATIENT_CONDITIONS, type PatientCondition } from '../../config/constants.js';
 import { env } from '../../config/env.js';
 import { TtlCache } from '../../lib/cache.js';
 import { Doctor } from '../doctors/doctor.model.js';
@@ -15,8 +9,6 @@ export const STATS_RANGES = ['30d', '90d', '6m', '12m'] as const;
 export type StatsRange = (typeof STATS_RANGES)[number];
 type Granularity = 'day' | 'week' | 'month';
 
-const AGE_BOUNDARIES = [0, 18, 30, 45, 60, 75, 121];
-const AGE_LABELS = ['0–17', '18–29', '30–44', '45–59', '60–74', '75+'];
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface Overview {
@@ -35,18 +27,7 @@ export interface Overview {
   };
   admissionsTrend: Array<{ bucket: string; admissions: number; critical: number }>;
   patientsByCondition: Array<{ condition: PatientCondition; count: number }>;
-  patientsByGender: Array<{ gender: Gender; count: number }>;
-  ageGroups: Array<{ label: string; count: number }>;
   topDoctors: Array<{ id: string; name: string; specialization: string; hospital: string; patients: number; critical: number }>;
-  specializations: Array<{ specialization: string; doctors: number; patients: number }>;
-  recentPatients: Array<{
-    id: string;
-    name: string;
-    condition: string;
-    diagnosis: string;
-    admissionDate: Date;
-    doctor: { id: string; name: string } | null;
-  }>;
 }
 
 interface Comparison {
@@ -144,17 +125,6 @@ export function patientBreakdownPipeline(): PipelineStage[] {
     {
       $facet: {
         byCondition: [{ $group: { _id: '$condition', count: { $sum: 1 } } }],
-        byGender: [{ $group: { _id: '$gender', count: { $sum: 1 } } }],
-        byAge: [
-          {
-            $bucket: {
-              groupBy: '$age',
-              boundaries: AGE_BOUNDARIES,
-              default: 'unknown',
-              output: { count: { $sum: 1 } },
-            },
-          },
-        ],
         topDoctors: [
           {
             $group: {
@@ -177,20 +147,6 @@ export function patientBreakdownPipeline(): PipelineStage[] {
           },
           { $unwind: '$doctor' },
         ],
-        bySpecialization: [
-          { $group: { _id: '$doctor', patients: { $sum: 1 } } },
-          {
-            $lookup: {
-              from: 'doctors',
-              localField: '_id',
-              foreignField: '_id',
-              as: 'doctor',
-              pipeline: [{ $project: { specialization: 1 } }],
-            },
-          },
-          { $unwind: '$doctor' },
-          { $group: { _id: '$doctor.specialization', patients: { $sum: '$patients' } } },
-        ],
       },
     },
   ];
@@ -199,25 +155,22 @@ export function patientBreakdownPipeline(): PipelineStage[] {
 async function patientDistributions() {
   const [result] = await Patient.aggregate<{
     byCondition: Array<{ _id: PatientCondition; count: number }>;
-    byGender: Array<{ _id: Gender; count: number }>;
-    byAge: Array<{ _id: number | 'unknown'; count: number }>;
     topDoctors: Array<{
       _id: Types.ObjectId;
       patients: number;
       critical: number;
       doctor: { name: string; specialization: string; hospital: string };
     }>;
-    bySpecialization: Array<{ _id: string; patients: number }>;
   }>(patientBreakdownPipeline());
   return result;
 }
 
-/** Doctors per specialization plus new-doctor counts for the current and previous period. */
+/** Total doctors plus new-doctor counts for the current and previous period. */
 export function doctorBreakdownPipeline(start: Date, previousStart: Date): PipelineStage[] {
   return [
     {
       $facet: {
-        bySpecialization: [{ $group: { _id: '$specialization', doctors: { $sum: 1 } } }],
+        total: [{ $count: 'n' }],
         joined: [
           { $match: { createdAt: { $gte: previousStart } } },
           {
@@ -235,32 +188,10 @@ export function doctorBreakdownPipeline(start: Date, previousStart: Date): Pipel
 
 async function doctorDistributions(start: Date, previousStart: Date) {
   const [result] = await Doctor.aggregate<{
-    bySpecialization: Array<{ _id: string; doctors: number }>;
+    total: Array<{ n: number }>;
     joined: Array<{ current: number; previous: number }>;
   }>(doctorBreakdownPipeline(start, previousStart));
   return result;
-}
-
-export function recentAdmissionsQuery() {
-  return Patient.find()
-    .sort({ admissionDate: -1, _id: -1 })
-    .limit(5)
-    .select('name condition diagnosis admissionDate doctor')
-    .populate<{ doctor: { _id: Types.ObjectId; name: string } | null }>('doctor', 'name')
-    .lean();
-}
-
-async function recentAdmissions() {
-  const patients = await recentAdmissionsQuery();
-
-  return patients.map((p) => ({
-    id: String(p._id),
-    name: p.name,
-    condition: p.condition,
-    diagnosis: p.diagnosis,
-    admissionDate: p.admissionDate,
-    doctor: p.doctor ? { id: String(p.doctor._id), name: p.doctor.name } : null,
-  }));
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -275,11 +206,10 @@ export function resolvePeriod(range: StatsRange, now = new Date()) {
 async function computeOverview(range: StatsRange): Promise<Overview> {
   const { unit, start, previousStart, now } = resolvePeriod(range);
 
-  const [admissions, patients, doctors, recentPatients] = await Promise.all([
+  const [admissions, patients, doctors] = await Promise.all([
     admissionsInPeriod(unit, start, previousStart, now),
     patientDistributions(),
     doctorDistributions(start, previousStart),
-    recentAdmissions(),
   ]);
 
   // Zero-fill so charts get a continuous axis.
@@ -301,27 +231,8 @@ async function computeOverview(range: StatsRange): Promise<Overview> {
     count: conditionCounts.get(condition) ?? 0,
   }));
 
-  const genderCounts = new Map(patients?.byGender.map((r) => [r._id, r.count]));
-  const patientsByGender = GENDERS.map((gender) => ({ gender, count: genderCounts.get(gender) ?? 0 }));
-
-  const ageCounts = new Map(patients?.byAge.map((r) => [r._id, r.count]));
-  const ageGroups = AGE_LABELS.map((label, i) => ({
-    label,
-    count: ageCounts.get(AGE_BOUNDARIES[i] as number) ?? 0,
-  }));
-
-  const doctorsBySpec = new Map(doctors?.bySpecialization.map((r) => [r._id, r.doctors]));
-  const patientsBySpec = new Map(patients?.bySpecialization.map((r) => [r._id, r.patients]));
-  const specializations = SPECIALIZATIONS.map((specialization) => ({
-    specialization,
-    doctors: doctorsBySpec.get(specialization) ?? 0,
-    patients: patientsBySpec.get(specialization) ?? 0,
-  }))
-    .filter((row) => row.doctors > 0 || row.patients > 0)
-    .sort((a, b) => b.patients - a.patients);
-
   const totalPatients = patientsByCondition.reduce((sum, row) => sum + row.count, 0);
-  const totalDoctors = specializations.reduce((sum, row) => sum + row.doctors, 0);
+  const totalDoctors = doctors?.total[0]?.n ?? 0;
   const joined = doctors?.joined[0];
 
   return {
@@ -340,8 +251,6 @@ async function computeOverview(range: StatsRange): Promise<Overview> {
     },
     admissionsTrend,
     patientsByCondition,
-    patientsByGender,
-    ageGroups,
     topDoctors: (patients?.topDoctors ?? []).map((row) => ({
       id: String(row._id),
       name: row.doctor.name,
@@ -350,8 +259,6 @@ async function computeOverview(range: StatsRange): Promise<Overview> {
       patients: row.patients,
       critical: row.critical,
     })),
-    specializations,
-    recentPatients,
   };
 }
 

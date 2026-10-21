@@ -2,7 +2,7 @@
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
-import type { Condition, Gender, Specialization, StatsRange } from "@/lib/constants";
+import type { Condition, Specialization, StatsRange } from "@/lib/constants";
 import { statsKeys } from "@/lib/query-keys";
 import type { DataResponse } from "@/types/api";
 
@@ -20,8 +20,6 @@ export interface Overview {
   period: { admissions: Comparison; newDoctors: Comparison };
   admissionsTrend: Array<{ bucket: string; admissions: number; critical: number }>;
   patientsByCondition: Array<{ condition: Condition; count: number }>;
-  patientsByGender: Array<{ gender: Gender; count: number }>;
-  ageGroups: Array<{ label: string; count: number }>;
   topDoctors: Array<{
     id: string;
     name: string;
@@ -29,15 +27,6 @@ export interface Overview {
     hospital: string;
     patients: number;
     critical: number;
-  }>;
-  specializations: Array<{ specialization: Specialization; doctors: number; patients: number }>;
-  recentPatients: Array<{
-    id: string;
-    name: string;
-    condition: Condition;
-    diagnosis: string;
-    admissionDate: string;
-    doctor: { id: string; name: string } | null;
   }>;
 }
 

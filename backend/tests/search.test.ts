@@ -39,7 +39,12 @@ describe('buildSearchFilter', () => {
   });
 
   it('caps the number of terms', () => {
-    const filter = buildSearchFilter('a b c d e f g h');
+    const filter = buildSearchFilter('aa bb cc dd ee ff gg hh');
     expect(filter?.searchKeywords.$all).toHaveLength(5);
+  });
+
+  it('ignores one-character terms', () => {
+    expect(buildSearchFilter('a')).toBeUndefined();
+    expect(buildSearchFilter('maya c')?.searchKeywords.$all.map(String)).toEqual(['/^maya/']);
   });
 });

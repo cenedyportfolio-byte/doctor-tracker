@@ -13,6 +13,8 @@ interface SearchInputProps {
   placeholder?: string;
   label?: string;
   delay?: number;
+  /** Shorter input is not searched (the API ignores 1-character terms too). */
+  minLength?: number;
   className?: string;
 }
 
@@ -26,10 +28,14 @@ export function SearchInput({
   placeholder = "Search…",
   label = "Search",
   delay = 300,
+  minLength = 2,
   className,
 }: SearchInputProps) {
   const [value, setValue] = useState(defaultValue);
-  const debouncedSearch = useDebouncedCallback((next: string) => onSearch(next.trim()), delay);
+  const debouncedSearch = useDebouncedCallback((next: string) => {
+    const term = next.trim();
+    onSearch(term.length >= minLength ? term : "");
+  }, delay);
 
   const change = (next: string) => {
     setValue(next);

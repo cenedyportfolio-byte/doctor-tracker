@@ -14,6 +14,8 @@
 
 const MAX_TERMS = 5;
 const MAX_TERM_LENGTH = 40;
+// A one-letter prefix matches most keywords, so the index can't narrow anything; skip it.
+const MIN_TERM_LENGTH = 2;
 
 export function normalize(value: string): string {
   return value
@@ -60,6 +62,7 @@ export function buildSearchFilter(search: string | undefined) {
   else for (const term of tokenize(search)) terms.add(term);
 
   const regexes = [...terms]
+    .filter((term) => term.length >= MIN_TERM_LENGTH)
     .slice(0, MAX_TERMS)
     .map((term) => new RegExp(`^${escapeRegex(term.slice(0, MAX_TERM_LENGTH))}`));
 

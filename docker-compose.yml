@@ -1,0 +1,56 @@
+# Local infrastructure for Doctor Tracker.
+#
+#   docker compose up -d mongo                    # just the database (for `npm run dev`)
+#   docker compose --profile app up -d --build    # database + API + web app
+#   docker compose --profile app run --rm api node dist/scripts/seed.js --force   # demo data
+#
+# Variables are read from ./.env (see .env.example).
+#
+services:
+  mongo:
+    image: mongo:7.0
+    restart: unless-stopped
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    profiles: ["app"]
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      # Defaults to the bundled container; set MONGODB_URI in .env to use MongoDB Atlas instead.
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/doctor_tracker}
+      JWT_SECRET: ${JWT_SECRET:-} # required for the app profile, see .env.example
+      COOKIE_SECURE: "false" # served over plain HTTP locally
+      CORS_ORIGINS: http://localhost:${WEB_PORT:-3000}
+    ports:
+      - "${API_PORT:-4000}:4000"
+
+  web:
+    profiles: ["app"]
+    build:
+      context: ./frontend
+      args:
+        API_URL: http://api:4000
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-} # required for the app profile, see .env.example
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+
+volumes:
+  mongo-data:

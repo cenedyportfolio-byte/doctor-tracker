@@ -34,6 +34,8 @@ type PatientRecord = Omit<PatientDoc, 'searchKeywords' | 'doctor'> & {
 };
 
 const DOCTOR_FIELDS = 'name specialization';
+// Exactly the fields the list returns (no __v, no derived search keywords).
+const LIST_FIELDS = 'name age gender phone email diagnosis condition admissionDate notes doctor createdAt updatedAt';
 
 // `_id` is the tie-breaker so pages are stable when sort keys collide.
 export const PATIENT_SORT_SPECS: Record<ListPatientsQuery['sort'], Record<string, SortOrder>> = {
@@ -96,6 +98,7 @@ export async function listPatients(
 
   const [patients, total] = await Promise.all([
     Patient.find(filter)
+      .select(LIST_FIELDS)
       .sort(PATIENT_SORT_SPECS[query.sort])
       .skip(skipFor(query.page, query.limit))
       .limit(query.limit)

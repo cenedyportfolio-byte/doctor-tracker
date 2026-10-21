@@ -33,6 +33,9 @@ export interface DoctorDetailDTO extends DoctorDTO {
 
 type DoctorRecord = Omit<DoctorDoc, 'searchKeywords'>;
 
+// Exactly the fields the list returns (no __v, no derived search keywords).
+const LIST_FIELDS = 'name specialization hospital phone email createdAt updatedAt';
+
 // `_id` is the tie-breaker so pages are stable when sort keys collide. Each sort matches an
 // index (traversed forwards or backwards), so MongoDB never sorts in memory.
 export const DOCTOR_SORT_SPECS: Record<ListDoctorsQuery['sort'], Record<string, SortOrder>> = {
@@ -76,6 +79,7 @@ export async function listDoctors(query: ListDoctorsQuery): Promise<Paginated<Do
 
   const [doctors, total] = await Promise.all([
     Doctor.find(filter)
+      .select(LIST_FIELDS)
       .sort(DOCTOR_SORT_SPECS[query.sort])
       .skip(skipFor(query.page, query.limit))
       .limit(query.limit)

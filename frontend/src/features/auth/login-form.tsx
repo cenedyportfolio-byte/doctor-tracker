@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Eye, EyeOff, Info, LogIn } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -18,11 +18,6 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 type LoginValues = z.infer<typeof loginSchema>;
-
-const DEMO_ACCOUNTS = [
-  { label: "Admin", description: "Full access", email: "admin@doctortracker.dev", password: "Admin@12345" },
-  { label: "Viewer", description: "Read-only", email: "viewer@doctortracker.dev", password: "Viewer@12345" },
-] as const;
 
 function safeNext(value: string | null): string {
   return value && value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/login")
@@ -41,7 +36,6 @@ export function LoginForm() {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -57,11 +51,6 @@ export function LoginForm() {
     });
   });
 
-  const fillDemo = (account: (typeof DEMO_ACCOUNTS)[number]) => {
-    setValue("email", account.email, { shouldValidate: true });
-    setValue("password", account.password, { shouldValidate: true });
-  };
-
   const formError =
     login.error instanceof ApiError && login.error.status === 429
       ? login.error.message
@@ -72,10 +61,9 @@ export function LoginForm() {
   return (
     <div className="w-full">
       {expired && !login.error && (
-        <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-border bg-info-soft px-3.5 py-3 text-sm text-info-soft-foreground">
-          <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+        <p role="status" className="mb-4 rounded-md border border-border bg-surface-2 px-3 py-2 text-sm text-muted">
           Your session has expired. Please sign in again.
-        </div>
+        </p>
       )}
 
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
@@ -84,7 +72,6 @@ export function LoginForm() {
             id="email"
             type="email"
             autoComplete="email"
-            placeholder="you@hospital.com"
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? fieldMessageId("email") : undefined}
             {...register("email")}
@@ -97,8 +84,7 @@ export function LoginForm() {
               id="password"
               type={showPassword ? "text" : "password"}
               autoComplete="current-password"
-              placeholder="••••••••"
-              className="pr-11"
+              className="pr-10"
               aria-invalid={!!errors.password}
               aria-describedby={errors.password ? fieldMessageId("password") : undefined}
               {...register("password")}
@@ -106,7 +92,7 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute top-1/2 right-1.5 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-foreground"
+              className="absolute top-1/2 right-1 flex size-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-subtle hover:bg-surface-2 hover:text-foreground"
               aria-label={showPassword ? "Hide password" : "Show password"}
               aria-pressed={showPassword}
             >
@@ -116,40 +102,16 @@ export function LoginForm() {
         </Field>
 
         {formError && (
-          <p
-            role="alert"
-            className="rounded-xl border border-danger/20 bg-danger-soft px-3.5 py-2.5 text-sm font-medium text-danger-soft-foreground"
-          >
+          <p role="alert" className="rounded-md border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger-soft-foreground">
             {formError}
           </p>
         )}
 
         <Button type="submit" size="lg" loading={login.isPending || login.isSuccess} className="mt-1 w-full">
-          {!login.isPending && !login.isSuccess && <LogIn className="size-4" />}
-          Sign in
+          {login.isPending || login.isSuccess ? "Signing in…" : "Sign in"}
         </Button>
       </form>
 
-      <div className="mt-8">
-        <div className="flex items-center gap-3 text-xs font-medium tracking-wide text-subtle uppercase">
-          <span className="h-px flex-1 bg-border" />
-          Demo accounts
-          <span className="h-px flex-1 bg-border" />
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          {DEMO_ACCOUNTS.map((account) => (
-            <button
-              key={account.label}
-              type="button"
-              onClick={() => fillDemo(account)}
-              className="cursor-pointer rounded-xl border border-border bg-surface-2 px-3.5 py-3 text-left transition-colors hover:border-primary/50 hover:bg-primary-soft"
-            >
-              <span className="block text-sm font-semibold text-foreground">{account.label}</span>
-              <span className="block text-xs text-muted">{account.description}</span>
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

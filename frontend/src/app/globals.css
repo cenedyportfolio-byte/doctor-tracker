@@ -2,12 +2,8 @@
 
 /*
  * Design tokens. Components only use these semantic tokens (bg-surface, text-muted, ...),
- * never raw palette colors, so light/dark mode is a single token swap.
- * The theme is resolved to data-theme="light" | "dark" on <html> before first paint
- * (see the inline script in app/layout.tsx).
+ * never raw palette colors.
  */
-
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root {
   color-scheme: light;
@@ -55,50 +51,6 @@
 
   --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.04);
   --shadow-overlay: 0 20px 40px -12px rgb(16 24 40 / 0.25), 0 4px 12px rgb(16 24 40 / 0.08);
-}
-
-[data-theme="dark"] {
-  color-scheme: dark;
-
-  --background: #0b1220;
-  --surface: #111a2b;
-  --surface-2: #142034;
-  --surface-3: #1a263d;
-  --border: #1f2b40;
-  --border-strong: #2c3a52;
-  --foreground: #e6ebf2;
-  --muted: #9aa8bb;
-  --subtle: #6b7a90;
-
-  --primary: #2dd4bf;
-  --primary-hover: #5eead4;
-  --primary-foreground: #042f2e;
-  --primary-soft: rgb(45 212 191 / 0.12);
-  --primary-soft-foreground: #5eead4;
-  --ring: #2dd4bf;
-
-  --danger: #dc2626;
-  --danger-hover: #ef4444;
-  --danger-soft: rgb(248 113 113 / 0.12);
-  --danger-soft-foreground: #fca5a5;
-  --warning-soft: rgb(251 191 36 / 0.12);
-  --warning-soft-foreground: #fcd34d;
-  --success-soft: rgb(52 211 153 / 0.12);
-  --success-soft-foreground: #6ee7b7;
-  --info-soft: rgb(96 165 250 / 0.12);
-  --info-soft-foreground: #93c5fd;
-  --neutral-soft: rgb(148 163 184 / 0.14);
-  --neutral-soft-foreground: #cbd5e1;
-
-  --chart-1: #3987e5;
-  --chart-2: #d95926;
-  --chart-3: #199e70;
-  --chart-grid: #1f2b40;
-  --chart-axis: #2c3a52;
-  --status-neutral: #64748b;
-
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3);
-  --shadow-overlay: 0 24px 48px -12px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.04);
 }
 
 @theme inline {
@@ -206,9 +158,6 @@
   input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
     opacity: 0.6;
-  }
-  [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
   }
 
   @media (prefers-reduced-motion: reduce) {

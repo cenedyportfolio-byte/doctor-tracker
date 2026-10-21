@@ -7,7 +7,6 @@ import { useCurrentUser } from "@/features/auth/api";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
 import { NAV_ITEMS, isActive } from "./nav-items";
-import { ThemeSwitcher } from "./theme-switcher";
 import { RoleBadge, UserCard } from "./user-card";
 
 export function Sidebar() {
@@ -34,7 +33,6 @@ export function Sidebar() {
           <span className="text-xs font-medium text-muted">Access</span>
           {user && <RoleBadge role={user.role} />}
         </div>
-        <ThemeSwitcher />
         <UserCard />
       </div>
     </aside>

@@ -1,12 +1,12 @@
 import { cn, hashString, initials } from "@/lib/utils";
 
 const TINTS = [
-  "bg-[#e0f2fe] text-[#0c4a6e] dark:bg-[#0c4a6e]/50 dark:text-[#bae6fd]",
-  "bg-[#dcfce7] text-[#14532d] dark:bg-[#14532d]/50 dark:text-[#bbf7d0]",
-  "bg-[#fef3c7] text-[#78350f] dark:bg-[#78350f]/45 dark:text-[#fde68a]",
-  "bg-[#ede9fe] text-[#4c1d95] dark:bg-[#4c1d95]/50 dark:text-[#ddd6fe]",
-  "bg-[#fce7f3] text-[#831843] dark:bg-[#831843]/45 dark:text-[#fbcfe8]",
-  "bg-[#ccfbf1] text-[#134e4a] dark:bg-[#134e4a]/55 dark:text-[#99f6e4]",
+  "bg-[#e0f2fe] text-[#0c4a6e]",
+  "bg-[#dcfce7] text-[#14532d]",
+  "bg-[#fef3c7] text-[#78350f]",
+  "bg-[#ede9fe] text-[#4c1d95]",
+  "bg-[#fce7f3] text-[#831843]",
+  "bg-[#ccfbf1] text-[#134e4a]",
 ] as const;
 
 const SIZES = {

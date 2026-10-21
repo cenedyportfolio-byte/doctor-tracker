@@ -10,7 +10,6 @@ import { useCurrentUser, useLogout } from "@/features/auth/api";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
 import { NAV_ITEMS, isActive } from "./nav-items";
-import { ThemeSwitcher } from "./theme-switcher";
 import { RoleBadge } from "./user-card";
 
 /** Top bar for small screens: logo + account menu. */
@@ -74,7 +73,6 @@ function AccountMenu() {
               </div>
             </div>
           )}
-          <ThemeSwitcher />
           <Button
             variant="ghost"
             className="mt-2 w-full justify-start"

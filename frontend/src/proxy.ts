@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/session";
 
-const PUBLIC_ROUTES = new Set(["/login"]);
+// The landing page and login are public; signed-in users are sent on to the app.
+const PUBLIC_ROUTES = new Set(["/", "/login"]);
 const HOME = "/dashboard";
 
 /** Only allow same-site relative paths as post-login redirect targets. */
@@ -23,7 +24,7 @@ export async function proxy(request: NextRequest) {
 
   if (!session && !isPublic) {
     const loginUrl = new URL("/login", request.url);
-    if (pathname !== "/") loginUrl.searchParams.set("next", `${pathname}${search}`);
+    loginUrl.searchParams.set("next", `${pathname}${search}`);
     if (token) loginUrl.searchParams.set("expired", "1");
 
     const response = NextResponse.redirect(loginUrl);
@@ -31,7 +32,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  if (session && (isPublic || pathname === "/")) {
+  if (session && isPublic) {
     const target = safeNext(request.nextUrl.searchParams.get("next")) ?? HOME;
     return NextResponse.redirect(new URL(target, request.url));
   }

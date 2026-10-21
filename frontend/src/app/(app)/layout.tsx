@@ -1,5 +1,5 @@
-import { MobileHeader, MobileTabBar } from "@/components/layout/mobile-nav";
 import { Sidebar } from "@/components/layout/sidebar";
+import { TopBar } from "@/components/layout/top-bar";
 
 /** Authenticated app shell. Access is enforced by `src/proxy.ts` before this renders. */
 export default function AppLayout({ children }: LayoutProps<"/">) {
@@ -7,18 +7,17 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
     <div className="min-h-dvh">
       <a
         href="#main"
-        className="sr-only z-50 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+        className="sr-only z-50 rounded-md bg-surface px-4 py-2 text-sm font-medium text-foreground focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:ring-1 focus:ring-ring"
       >
         Skip to content
       </a>
       <Sidebar />
-      <MobileHeader />
-      <div className="lg:pl-64">
-        <main id="main" className="mx-auto w-full max-w-[1400px] px-4 pt-6 pb-28 sm:px-6 lg:px-10 lg:pt-10 lg:pb-12">
+      <div className="lg:pl-56">
+        <TopBar />
+        <main id="main" className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
           {children}
         </main>
       </div>
-      <MobileTabBar />
     </div>
   );
 }

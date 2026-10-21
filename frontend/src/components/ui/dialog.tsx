@@ -12,8 +12,11 @@ interface DialogProps {
   description?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
-  /** `modal` is centered; `sheet` slides in from the right (bottom on small screens). */
-  variant?: "modal" | "sheet";
+  /**
+   * `modal` is centered; `sheet` slides in from the right (bottom on small screens);
+   * `drawer` slides in from the left at full height (navigation on small screens).
+   */
+  variant?: "modal" | "sheet" | "drawer";
   size?: "sm" | "md" | "lg";
   /** Blocks closing via Escape / backdrop, e.g. while a request is in flight. */
   dismissible?: boolean;
@@ -54,6 +57,7 @@ export function Dialog({
   };
 
   const isSheet = variant === "sheet";
+  const isDrawer = variant === "drawer";
 
   return (
     <dialog
@@ -74,16 +78,22 @@ export function Dialog({
       className={cn(
         "m-0 h-dvh max-h-none w-full max-w-none bg-transparent p-0 text-foreground",
         "backdrop:bg-black/40 open:flex",
-        isSheet ? "items-end justify-end sm:items-stretch" : "items-end justify-center sm:items-center sm:p-6",
+        isDrawer
+          ? "items-stretch justify-start"
+          : isSheet
+            ? "items-end justify-end sm:items-stretch"
+            : "items-end justify-center sm:items-center sm:p-6",
       )}
     >
       {open && (
         <div
           className={cn(
             "flex max-h-[92dvh] w-full flex-col bg-surface shadow-overlay",
-            isSheet
-              ? "animate-slide-in-up rounded-t-lg sm:h-dvh sm:max-h-none sm:max-w-md sm:animate-slide-in-right sm:rounded-none"
-              : cn("animate-slide-in-up rounded-t-lg sm:animate-scale-in sm:rounded-lg", MODAL_SIZES[size]),
+            isDrawer
+              ? "h-dvh max-h-none max-w-72 animate-slide-in-left"
+              : isSheet
+                ? "animate-slide-in-up rounded-t-lg sm:h-dvh sm:max-h-none sm:max-w-md sm:animate-slide-in-right sm:rounded-none"
+                : cn("animate-slide-in-up rounded-t-lg sm:animate-scale-in sm:rounded-lg", MODAL_SIZES[size]),
           )}
         >
           <header className="flex items-start justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">

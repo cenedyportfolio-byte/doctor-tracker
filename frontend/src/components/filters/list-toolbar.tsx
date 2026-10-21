@@ -44,7 +44,7 @@ export function ListToolbar<S extends string>({
         onSearch={onSearch}
         placeholder={searchPlaceholder}
         label={searchLabel}
-        className="min-w-0 flex-[1_1_16rem]"
+        className="min-w-0 basis-full lg:flex-[1_1_16rem]"
       />
       <Button variant="secondary" onClick={onOpenFilters}>
         <SlidersHorizontal className="size-4" />
@@ -54,7 +54,7 @@ export function ListToolbar<S extends string>({
         aria-label={sortLabel}
         value={sort}
         onChange={(e) => onSortChange(e.target.value as S)}
-        className="w-36 sm:w-40"
+        className="min-w-28 flex-1 sm:w-40 sm:flex-none"
       >
         {sortOptions.map((option) => (
           <option key={option.value} value={option.value}>

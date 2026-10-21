@@ -10,7 +10,7 @@ export interface TooltipRow {
 /** Shared tooltip body: mark swatches carry identity, text stays in text colors. */
 export function ChartTooltipCard({ title, rows, footer }: { title: ReactNode; rows: TooltipRow[]; footer?: ReactNode }) {
   return (
-    <div className="min-w-40 rounded-xl border border-border bg-surface px-3 py-2.5 text-xs shadow-overlay">
+    <div className="min-w-40 rounded-md border border-border bg-surface px-3 py-2 text-xs shadow-overlay">
       <p className="mb-1.5 font-semibold text-foreground">{title}</p>
       <ul className="space-y-1">
         {rows.map((row) => (

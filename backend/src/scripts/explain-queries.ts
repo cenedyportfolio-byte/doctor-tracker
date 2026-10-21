@@ -1,106 +1,113 @@
 /**
- * Prints the winning plan for the API's hot queries so index usage can be verified.
+ * Prints MongoDB query plans for the API's hot queries as a markdown table.
  *
  *   npm run explain
  *
- * Every query should be answered from an index (IXSCAN / COUNT_SCAN / DISTINCT_SCAN). Searches
- * are the one place an in-memory SORT is expected: the multikey index narrows the match to a
- * handful of documents first, and sorting those is cheaper than walking a sort index.
+ * The queries are built with the same functions the services use (filter builders, sort
+ * specs, aggregation pipelines), so the numbers describe what the API actually runs.
+ * Look for: index scans (IXSCAN / COUNT_SCAN) instead of COLLSCAN, and docsExamined close to
+ * nReturned. "docsExamined 0" means the query was answered from the index alone.
  */
+import type { Aggregate, Query } from 'mongoose';
 import { connectDatabase, disconnectDatabase } from '../config/db.js';
-import { buildSearchFilter } from '../lib/search.js';
 import { Doctor } from '../modules/doctors/doctor.model.js';
+import { listDoctorsQuery } from '../modules/doctors/doctor.schema.js';
+import { buildDoctorFilter, DOCTOR_SORT_SPECS, doctorPatientMixPipeline } from '../modules/doctors/doctor.service.js';
 import { Patient } from '../modules/patients/patient.model.js';
+import { listPatientsQuery } from '../modules/patients/patient.schema.js';
+import { buildPatientFilter, PATIENT_SORT_SPECS } from '../modules/patients/patient.service.js';
+import * as stats from '../modules/stats/stats.service.js';
 
 interface PlanStage {
   stage: string;
   indexName?: string;
   inputStage?: PlanStage;
   inputStages?: PlanStage[];
+  queryPlan?: PlanStage;
 }
 
-interface QueryExplain {
-  queryPlanner: { winningPlan: PlanStage & { queryPlan?: PlanStage } };
+interface CursorExplain {
+  queryPlanner: { winningPlan: PlanStage };
   executionStats: { nReturned: number; totalKeysExamined: number; totalDocsExamined: number; executionTimeMillis: number };
 }
 
-// find() explains are flat; aggregate() explains nest the same data under stages[0].$cursor.
-type ExplainOutput = QueryExplain | { stages: Array<{ $cursor: QueryExplain }> };
+// find() explains are flat; aggregate() explains nest the cursor under stages[0].$cursor.
+type ExplainOutput = CursorExplain | { stages: Array<{ $cursor?: CursorExplain; nReturned?: number }> };
 
-function describe(plan: PlanStage | undefined): string[] {
+function planStages(plan: PlanStage | undefined): string[] {
   if (!plan) return [];
   const self = plan.indexName ? `${plan.stage}(${plan.indexName})` : plan.stage;
-  const children = [plan.inputStage, ...(plan.inputStages ?? [])].flatMap(describe);
-  return [self, ...children];
+  return [self, ...[plan.inputStage, ...(plan.inputStages ?? [])].flatMap(planStages)];
 }
 
-async function report(label: string, explain: Promise<unknown>) {
-  const output = (await explain) as ExplainOutput;
-  const result = 'stages' in output ? output.stages[0]!.$cursor : output;
-  const winning = result.queryPlanner.winningPlan;
-  const stages = describe(winning.queryPlan ?? winning);
-  const stats = result.executionStats;
-  console.log(`\n${label}`);
-  console.log(`  plan:      ${stages.join(' <- ')}`);
+async function row(label: string, explainable: Query<unknown, unknown> | Aggregate<unknown>) {
+  const output = (await explainable.explain('executionStats')) as unknown as ExplainOutput;
+  const cursor = 'stages' in output ? output.stages[0]?.$cursor : output;
+  if (!cursor) throw new Error(`No cursor stage in explain output for ${label}`);
+  const winning = cursor.queryPlanner.winningPlan;
+  const stages = planStages(winning.queryPlan ?? winning);
+  const scans = stages.filter((s) => s.includes('SCAN'));
+  const covered = stages.includes('PROJECTION_COVERED') || (scans.length > 0 && !stages.includes('FETCH') && !scans.some((s) => s.startsWith('COLLSCAN')));
+  const { totalKeysExamined, totalDocsExamined, nReturned, executionTimeMillis } = cursor.executionStats;
+  const finalRows = 'stages' in output ? output.stages.at(-1)?.nReturned : undefined;
   console.log(
-    `  examined:  ${stats.totalKeysExamined} keys, ${stats.totalDocsExamined} docs → ${stats.nReturned} returned in ${stats.executionTimeMillis}ms`,
+    `| ${label} | ${scans.join(', ')}${covered ? ' (index only)' : ''} | ${totalKeysExamined} | ${totalDocsExamined} | ${nReturned}${finalRows !== undefined && finalRows !== nReturned ? ` → ${finalRows}` : ''} | ${executionTimeMillis} |`,
   );
-  if (stages.includes('COLLSCAN')) console.log('  WARNING: collection scan');
 }
 
 async function main() {
   await connectDatabase();
-  const sample = await Patient.findOne().sort({ admissionDate: -1 }).select('name doctor').lean();
+  const sample = await Patient.findOne().sort({ admissionDate: -1 }).select('doctor').lean();
   if (!sample) throw new Error('No data. Run `npm run seed` first.');
-  const [firstName = '', lastName = ''] = sample.name.split(' ');
-  const patientSearch = `${firstName.toLowerCase()} ${lastName.slice(0, 3).toLowerCase()}`;
-  const pageOfDoctors = await Doctor.find().sort({ createdAt: -1, _id: -1 }).limit(10).select('_id').lean();
+  const pageOfDoctors = await Doctor.find().sort(DOCTOR_SORT_SPECS.newest).limit(10).select('_id').lean();
+  const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
 
-  const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+  console.log('| Query | Plan | keysExamined | docsExamined | nReturned | ms |');
+  console.log('|---|---|---|---|---|---|');
 
-  await report(
-    'Doctors: default list (newest first, page 3)',
-    Doctor.find().sort({ createdAt: -1, _id: -1 }).skip(20).limit(10).explain('executionStats'),
-  );
-  await report(
-    'Doctors: search "card" sorted by name',
-    Doctor.find(buildSearchFilter('card')).sort({ name: 1, _id: 1 }).limit(10).explain('executionStats'),
-  );
-  await report(
-    'Doctors: specialization filter + joined date range',
-    Doctor.find({ specialization: { $in: ['Cardiology'] }, createdAt: { $gte: since } })
-      .sort({ createdAt: -1, _id: -1 })
-      .limit(10)
-      .explain('executionStats'),
-  );
-  await report(
-    "Patients: one doctor's patients (newest first)",
-    Patient.find({ doctor: sample.doctor }).sort({ admissionDate: -1, _id: -1 }).limit(10).explain('executionStats'),
-  );
-  await report(
-    'Patients: critical, admitted in last 90 days',
-    Patient.find({ condition: { $in: ['critical'] }, admissionDate: { $gte: since } })
-      .sort({ admissionDate: -1, _id: -1 })
-      .limit(10)
-      .explain('executionStats'),
-  );
-  await report(
-    `Patients: multi-word prefix search "${patientSearch}"`,
-    Patient.find(buildSearchFilter(patientSearch)).sort({ admissionDate: -1, _id: -1 }).limit(10).explain('executionStats'),
-  );
-  await report(
-    'Patients: filtered count (what countDocuments runs)',
-    Patient.aggregate([{ $match: { condition: 'critical' } }, { $group: { _id: null, n: { $sum: 1 } } }]).explain(
-      'executionStats',
-    ),
-  );
-  await report(
-    'Patients: patient counts for one page of doctors',
+  // Doctors list (GET /doctors)
+  for (const [label, input] of [
+    ['Doctors: default list, page 1', {}],
+    ['Doctors: default list, page 3', { page: '3' }],
+    ['Doctors: search "car" + specialization + joined date', { search: 'car', specialization: 'Cardiology,Neurology', from: '2025-01-01' }],
+    ['Doctors: hospital filter, sorted by name', { hospital: 'Riverside General Hospital', sort: 'name_asc' }],
+  ] as const) {
+    const q = listDoctorsQuery.parse(input);
+    await row(label, Doctor.find(buildDoctorFilter(q)).sort(DOCTOR_SORT_SPECS[q.sort]).skip((q.page - 1) * q.limit).limit(q.limit).lean());
+  }
+  await row(
+    'Doctors: patient counts for one page',
     Patient.aggregate([
       { $match: { doctor: { $in: pageOfDoctors.map((d) => d._id) } } },
       { $group: { _id: '$doctor', count: { $sum: 1 } } },
-    ]).explain('executionStats'),
+    ]),
   );
+
+  // Patients list (GET /patients)
+  for (const [label, input] of [
+    ['Patients: default list, page 1', {}],
+    ['Patients: search "a" + condition + date + gender + age', { search: 'a', condition: 'stable,recovering', from: since, gender: 'female', minAge: '30', maxAge: '70' }],
+    ['Patients: search "ar" + condition + date + gender + age', { search: 'ar', condition: 'stable,recovering', from: since, gender: 'female', minAge: '30', maxAge: '70' }],
+    ['Patients: condition + admission date', { condition: 'critical', from: since }],
+    ['Patients: gender + age only', { gender: 'female', minAge: '60' }],
+  ] as const) {
+    const q = listPatientsQuery.parse(input);
+    await row(label, Patient.find(buildPatientFilter(q)).sort(PATIENT_SORT_SPECS[q.sort]).limit(q.limit).lean());
+  }
+  {
+    const q = listPatientsQuery.parse({ condition: 'critical', from: since });
+    await row('Patients: count for condition + date', Patient.aggregate([{ $match: buildPatientFilter(q) }, { $count: 'n' }]));
+    const own = listPatientsQuery.parse({});
+    await row("Patients: one doctor's list", Patient.find(buildPatientFilter(own, String(sample.doctor))).sort(PATIENT_SORT_SPECS.newest).limit(10).lean());
+  }
+
+  // Dashboard (GET /stats/overview) and doctor profile (GET /doctors/:id)
+  const { unit, start, previousStart, now } = stats.resolvePeriod('12m');
+  await row('Dashboard: admissions trend (12m)', Patient.aggregate(stats.admissionsPipeline(unit, start, previousStart, now)));
+  await row('Dashboard: patient breakdowns', Patient.aggregate(stats.patientBreakdownPipeline()));
+  await row('Dashboard: doctor breakdowns', Doctor.aggregate(stats.doctorBreakdownPipeline(start, previousStart)));
+  await row('Dashboard: recent admissions', stats.recentAdmissionsQuery());
+  await row('Doctor profile: patient mix', Patient.aggregate(doctorPatientMixPipeline(sample.doctor)));
 
   await disconnectDatabase();
 }

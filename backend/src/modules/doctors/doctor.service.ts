@@ -1,4 +1,4 @@
-import type { QueryFilter, SortOrder } from 'mongoose';
+import type { PipelineStage, QueryFilter, SortOrder, Types } from 'mongoose';
 import { PATIENT_CONDITIONS, SPECIALIZATIONS, type PatientCondition } from '../../config/constants.js';
 import { ApiError } from '../../lib/api-error.js';
 import { buildPageMeta, skipFor, type Paginated } from '../../lib/pagination.js';
@@ -35,7 +35,7 @@ type DoctorRecord = Omit<DoctorDoc, 'searchKeywords'>;
 
 // `_id` is the tie-breaker so pages are stable when sort keys collide. Each sort matches an
 // index (traversed forwards or backwards), so MongoDB never sorts in memory.
-const SORTS: Record<ListDoctorsQuery['sort'], Record<string, SortOrder>> = {
+export const DOCTOR_SORT_SPECS: Record<ListDoctorsQuery['sort'], Record<string, SortOrder>> = {
   newest: { createdAt: -1, _id: -1 },
   oldest: { createdAt: 1, _id: 1 },
   name_asc: { name: 1, _id: 1 },
@@ -56,7 +56,7 @@ function toDoctorDTO(doctor: DoctorRecord, patientCount = 0): DoctorDTO {
   };
 }
 
-function buildDoctorFilter(query: ListDoctorsQuery): QueryFilter<DoctorDoc> {
+export function buildDoctorFilter(query: ListDoctorsQuery): QueryFilter<DoctorDoc> {
   const filter: QueryFilter<DoctorDoc> = { ...buildSearchFilter(query.search) };
 
   if (query.specialization) filter.specialization = { $in: query.specialization };
@@ -76,7 +76,7 @@ export async function listDoctors(query: ListDoctorsQuery): Promise<Paginated<Do
 
   const [doctors, total] = await Promise.all([
     Doctor.find(filter)
-      .sort(SORTS[query.sort])
+      .sort(DOCTOR_SORT_SPECS[query.sort])
       .skip(skipFor(query.page, query.limit))
       .limit(query.limit)
       .lean<DoctorRecord[]>(),
@@ -118,6 +118,19 @@ export async function listDoctorOptions(query: DoctorOptionsQuery) {
   }));
 }
 
+/** Patient counts by condition and the latest admission for one doctor. */
+export function doctorPatientMixPipeline(doctorId: Types.ObjectId): PipelineStage[] {
+  return [
+    { $match: { doctor: doctorId } },
+    {
+      $facet: {
+        byCondition: [{ $group: { _id: '$condition', count: { $sum: 1 } } }],
+        last: [{ $sort: { admissionDate: -1 } }, { $limit: 1 }, { $project: { admissionDate: 1 } }],
+      },
+    },
+  ];
+}
+
 export async function getDoctor(id: string): Promise<DoctorDetailDTO> {
   const doctor = await Doctor.findById(id).lean<DoctorRecord>();
   if (!doctor) throw ApiError.notFound('Doctor');
@@ -125,15 +138,7 @@ export async function getDoctor(id: string): Promise<DoctorDetailDTO> {
   const [summary] = await Patient.aggregate<{
     byCondition: Array<{ _id: PatientCondition; count: number }>;
     last: Array<{ admissionDate: Date }>;
-  }>([
-    { $match: { doctor: doctor._id } },
-    {
-      $facet: {
-        byCondition: [{ $group: { _id: '$condition', count: { $sum: 1 } } }],
-        last: [{ $sort: { admissionDate: -1 } }, { $limit: 1 }, { $project: { admissionDate: 1 } }],
-      },
-    },
-  ]);
+  }>(doctorPatientMixPipeline(doctor._id));
 
   const patientsByCondition = Object.fromEntries(PATIENT_CONDITIONS.map((c) => [c, 0])) as Record<
     PatientCondition,

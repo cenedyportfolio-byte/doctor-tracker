@@ -1,4 +1,4 @@
-import type { Types } from 'mongoose';
+import type { PipelineStage, Types } from 'mongoose';
 import {
   GENDERS,
   PATIENT_CONDITIONS,
@@ -102,11 +102,8 @@ function compare(current: number, previous: number): Comparison {
 // ---------------------------------------------------------------------------------------------
 
 /** Admissions per bucket for the selected period, plus the previous period's total. */
-async function admissionsInPeriod(unit: Granularity, start: Date, previousStart: Date, now: Date) {
-  const [result] = await Patient.aggregate<{
-    trend: Array<{ _id: Date; admissions: number; critical: number }>;
-    previous: Array<{ count: number }>;
-  }>([
+export function admissionsPipeline(unit: Granularity, start: Date, previousStart: Date, now: Date): PipelineStage[] {
+  return [
     // Bounded by the { admissionDate: -1 } index; only two periods' worth of documents are read.
     { $match: { admissionDate: { $gte: previousStart, $lte: now } } },
     {
@@ -126,7 +123,14 @@ async function admissionsInPeriod(unit: Granularity, start: Date, previousStart:
         previous: [{ $match: { admissionDate: { $lt: start } } }, { $count: 'count' }],
       },
     },
-  ]);
+  ];
+}
+
+async function admissionsInPeriod(unit: Granularity, start: Date, previousStart: Date, now: Date) {
+  const [result] = await Patient.aggregate<{
+    trend: Array<{ _id: Date; admissions: number; critical: number }>;
+    previous: Array<{ count: number }>;
+  }>(admissionsPipeline(unit, start, previousStart, now));
 
   return {
     trend: result?.trend ?? [],
@@ -135,19 +139,8 @@ async function admissionsInPeriod(unit: Granularity, start: Date, previousStart:
 }
 
 /** Whole-population breakdowns computed in a single collection pass via $facet. */
-async function patientDistributions() {
-  const [result] = await Patient.aggregate<{
-    byCondition: Array<{ _id: PatientCondition; count: number }>;
-    byGender: Array<{ _id: Gender; count: number }>;
-    byAge: Array<{ _id: number | 'unknown'; count: number }>;
-    topDoctors: Array<{
-      _id: Types.ObjectId;
-      patients: number;
-      critical: number;
-      doctor: { name: string; specialization: string; hospital: string };
-    }>;
-    bySpecialization: Array<{ _id: string; patients: number }>;
-  }>([
+export function patientBreakdownPipeline(): PipelineStage[] {
+  return [
     {
       $facet: {
         byCondition: [{ $group: { _id: '$condition', count: { $sum: 1 } } }],
@@ -200,16 +193,28 @@ async function patientDistributions() {
         ],
       },
     },
-  ]);
+  ];
+}
+
+async function patientDistributions() {
+  const [result] = await Patient.aggregate<{
+    byCondition: Array<{ _id: PatientCondition; count: number }>;
+    byGender: Array<{ _id: Gender; count: number }>;
+    byAge: Array<{ _id: number | 'unknown'; count: number }>;
+    topDoctors: Array<{
+      _id: Types.ObjectId;
+      patients: number;
+      critical: number;
+      doctor: { name: string; specialization: string; hospital: string };
+    }>;
+    bySpecialization: Array<{ _id: string; patients: number }>;
+  }>(patientBreakdownPipeline());
   return result;
 }
 
 /** Doctors per specialization plus new-doctor counts for the current and previous period. */
-async function doctorDistributions(start: Date, previousStart: Date) {
-  const [result] = await Doctor.aggregate<{
-    bySpecialization: Array<{ _id: string; doctors: number }>;
-    joined: Array<{ current: number; previous: number }>;
-  }>([
+export function doctorBreakdownPipeline(start: Date, previousStart: Date): PipelineStage[] {
+  return [
     {
       $facet: {
         bySpecialization: [{ $group: { _id: '$specialization', doctors: { $sum: 1 } } }],
@@ -225,17 +230,28 @@ async function doctorDistributions(start: Date, previousStart: Date) {
         ],
       },
     },
-  ]);
+  ];
+}
+
+async function doctorDistributions(start: Date, previousStart: Date) {
+  const [result] = await Doctor.aggregate<{
+    bySpecialization: Array<{ _id: string; doctors: number }>;
+    joined: Array<{ current: number; previous: number }>;
+  }>(doctorBreakdownPipeline(start, previousStart));
   return result;
 }
 
-async function recentAdmissions() {
-  const patients = await Patient.find()
+export function recentAdmissionsQuery() {
+  return Patient.find()
     .sort({ admissionDate: -1, _id: -1 })
     .limit(5)
     .select('name condition diagnosis admissionDate doctor')
     .populate<{ doctor: { _id: Types.ObjectId; name: string } | null }>('doctor', 'name')
     .lean();
+}
+
+async function recentAdmissions() {
+  const patients = await recentAdmissionsQuery();
 
   return patients.map((p) => ({
     id: String(p._id),
@@ -249,10 +265,15 @@ async function recentAdmissions() {
 
 // ---------------------------------------------------------------------------------------------
 
-async function computeOverview(range: StatsRange): Promise<Overview> {
-  const now = new Date();
+/** The selected period and the previous period of equal length. */
+export function resolvePeriod(range: StatsRange, now = new Date()) {
   const { unit, start } = resolveRange(range, now);
   const previousStart = new Date(start.getTime() - (now.getTime() - start.getTime()));
+  return { unit, start, previousStart, now };
+}
+
+async function computeOverview(range: StatsRange): Promise<Overview> {
+  const { unit, start, previousStart, now } = resolvePeriod(range);
 
   const [admissions, patients, doctors, recentPatients] = await Promise.all([
     admissionsInPeriod(unit, start, previousStart, now),

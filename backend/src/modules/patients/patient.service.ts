@@ -36,7 +36,7 @@ type PatientRecord = Omit<PatientDoc, 'searchKeywords' | 'doctor'> & {
 const DOCTOR_FIELDS = 'name specialization';
 
 // `_id` is the tie-breaker so pages are stable when sort keys collide.
-const SORTS: Record<ListPatientsQuery['sort'], Record<string, SortOrder>> = {
+export const PATIENT_SORT_SPECS: Record<ListPatientsQuery['sort'], Record<string, SortOrder>> = {
   newest: { admissionDate: -1, _id: -1 },
   oldest: { admissionDate: 1, _id: 1 },
   name_asc: { name: 1, _id: 1 },
@@ -65,7 +65,7 @@ function toPatientDTO(patient: PatientRecord): PatientDTO {
   };
 }
 
-function buildPatientFilter(query: ListPatientsQuery, doctorId?: string): QueryFilter<PatientDoc> {
+export function buildPatientFilter(query: ListPatientsQuery, doctorId?: string): QueryFilter<PatientDoc> {
   const filter: QueryFilter<PatientDoc> = { ...buildSearchFilter(query.search) };
 
   const doctor = doctorId ?? query.doctor;
@@ -96,7 +96,7 @@ export async function listPatients(
 
   const [patients, total] = await Promise.all([
     Patient.find(filter)
-      .sort(SORTS[query.sort])
+      .sort(PATIENT_SORT_SPECS[query.sort])
       .skip(skipFor(query.page, query.limit))
       .limit(query.limit)
       // One extra `_id: { $in: [...] }` query for the doctors on this page.

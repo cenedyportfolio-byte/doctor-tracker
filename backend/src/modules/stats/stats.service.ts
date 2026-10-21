@@ -139,33 +139,23 @@ async function patientDistributions() {
   return { byCondition, topDoctors };
 }
 
-/** Total doctors plus new-doctor counts for the current and previous period. */
-export function doctorBreakdownPipeline(start: Date, previousStart: Date): PipelineStage[] {
-  return [
-    {
-      $facet: {
-        total: [{ $count: 'n' }],
-        joined: [
-          { $match: { createdAt: { $gte: previousStart } } },
-          {
-            $group: {
-              _id: null,
-              current: { $sum: { $cond: [{ $gte: ['$createdAt', start] }, 1, 0] } },
-              previous: { $sum: { $cond: [{ $lt: ['$createdAt', start] }, 1, 0] } },
-            },
-          },
-        ],
-      },
-    },
-  ];
+/** Doctors who joined in the current and the previous period (index counts on createdAt). */
+export function joinedFilters(start: Date, previousStart: Date) {
+  return {
+    current: { createdAt: { $gte: start } },
+    previous: { createdAt: { $gte: previousStart, $lt: start } },
+  };
 }
 
-async function doctorDistributions(start: Date, previousStart: Date) {
-  const [result] = await Doctor.aggregate<{
-    total: Array<{ n: number }>;
-    joined: Array<{ current: number; previous: number }>;
-  }>(doctorBreakdownPipeline(start, previousStart));
-  return result;
+async function doctorCounts(start: Date, previousStart: Date) {
+  const joined = joinedFilters(start, previousStart);
+  const [total, current, previous] = await Promise.all([
+    // Collection metadata: O(1), exact under normal operation.
+    Doctor.estimatedDocumentCount(),
+    Doctor.countDocuments(joined.current),
+    Doctor.countDocuments(joined.previous),
+  ]);
+  return { total, joined: { current, previous } };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -183,7 +173,7 @@ async function computeOverview(range: StatsRange): Promise<Overview> {
   const [admissions, patients, doctors] = await Promise.all([
     admissionsInPeriod(start, previousStart, now),
     patientDistributions(),
-    doctorDistributions(start, previousStart),
+    doctorCounts(start, previousStart),
   ]);
 
   // Zero-fill so charts get a continuous axis.
@@ -206,8 +196,8 @@ async function computeOverview(range: StatsRange): Promise<Overview> {
   }));
 
   const totalPatients = patientsByCondition.reduce((sum, row) => sum + row.count, 0);
-  const totalDoctors = doctors?.total[0]?.n ?? 0;
-  const joined = doctors?.joined[0];
+  const totalDoctors = doctors.total;
+  const { joined } = doctors;
 
   return {
     range,
@@ -220,7 +210,7 @@ async function computeOverview(range: StatsRange): Promise<Overview> {
     },
     period: {
       admissions: compare(currentAdmissions, admissions.previousTotal),
-      newDoctors: compare(joined?.current ?? 0, joined?.previous ?? 0),
+      newDoctors: compare(joined.current, joined.previous),
     },
     admissionsTrend,
     patientsByCondition,

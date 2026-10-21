@@ -106,7 +106,9 @@ async function main() {
   await row('Dashboard: admissions trend (90d)', Patient.aggregate(stats.admissionsPipeline(start, previousStart, now)));
   await row('Dashboard: patients per condition', Patient.aggregate(stats.conditionCountsPipeline()));
   await row('Dashboard: patients per doctor (top 10)', Patient.aggregate(stats.patientsPerDoctorPipeline()));
-  await row('Dashboard: doctor breakdowns', Doctor.aggregate(stats.doctorBreakdownPipeline(start, previousStart)));
+  const joined = stats.joinedFilters(start, previousStart);
+  await row('Dashboard: doctors joined (current period)', Doctor.aggregate([{ $match: joined.current }, { $count: 'n' }]));
+  await row('Dashboard: doctors joined (previous period)', Doctor.aggregate([{ $match: joined.previous }, { $count: 'n' }]));
   await row('Doctor profile: patient mix', Patient.aggregate(doctorPatientMixPipeline(sample.doctor)));
 
   await disconnectDatabase();

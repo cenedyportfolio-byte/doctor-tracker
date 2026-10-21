@@ -1,5 +1,3 @@
-"use client";
-
 import { memo } from "react";
 import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
 import { ChartCard, DataTable, LegendItem, type ChartStatus } from "@/components/charts/chart-card";

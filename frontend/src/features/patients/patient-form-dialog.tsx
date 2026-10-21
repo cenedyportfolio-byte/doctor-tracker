@@ -1,5 +1,3 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, type DefaultValues } from "react-hook-form";
 import { toast } from "sonner";

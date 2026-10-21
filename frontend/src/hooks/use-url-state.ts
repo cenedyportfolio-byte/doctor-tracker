@@ -1,5 +1,3 @@
-"use client";
-
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { toSearchParams, type QueryParams } from "@/lib/api-client";

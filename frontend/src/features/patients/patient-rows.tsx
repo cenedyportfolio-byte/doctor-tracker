@@ -1,5 +1,3 @@
-"use client";
-
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { memo } from "react";

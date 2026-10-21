@@ -1,5 +1,3 @@
-"use client";
-
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { controlStyles } from "@/components/ui/input";

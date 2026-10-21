@@ -1,5 +1,3 @@
-"use client";
-
 import { useRouter } from "next/navigation";
 import { memo } from "react";
 import { Bar, BarChart, Cell, LabelList, Tooltip, XAxis, YAxis } from "recharts";

@@ -1,5 +1,3 @@
-"use client";
-
 import { BarChart3, Table2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Card, CardHeader } from "@/components/ui/card";

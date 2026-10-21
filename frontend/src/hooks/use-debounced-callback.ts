@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useMemo, useRef } from "react";
 
 /** Returns a stable, debounced version of `callback` that always calls its latest version. */

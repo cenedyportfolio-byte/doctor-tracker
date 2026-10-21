@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Skeleton } from "@/components/ui/skeleton";

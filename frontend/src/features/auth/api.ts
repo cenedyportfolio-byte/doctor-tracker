@@ -1,5 +1,3 @@
-"use client";
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { api } from "@/lib/api-client";

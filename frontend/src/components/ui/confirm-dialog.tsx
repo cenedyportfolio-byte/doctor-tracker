@@ -1,5 +1,3 @@
-"use client";
-
 import type { ReactNode } from "react";
 import { Button } from "./button";
 import { Dialog } from "./dialog";

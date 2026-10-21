@@ -1,5 +1,3 @@
-"use client";
-
 import { subDays, subMonths } from "date-fns";
 import { useId } from "react";
 import { Input } from "@/components/ui/input";

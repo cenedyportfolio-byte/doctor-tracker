@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { DateRangeFilter, type DateRange } from "@/components/filters/date-range-filter";
 import { FilterSheet } from "@/components/filters/filter-sheet";

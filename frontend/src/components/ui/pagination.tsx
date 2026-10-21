@@ -1,5 +1,3 @@
-"use client";
-
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { memo } from "react";
 import { PAGE_SIZES } from "@/lib/constants";

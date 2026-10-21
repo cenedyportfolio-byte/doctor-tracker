@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo } from "react";
 import { readEnum, readInt, readList, readString, useUrlState } from "@/hooks/use-url-state";
 import { CONDITIONS, GENDERS, PAGE_SIZES, PATIENT_SORTS, type Gender } from "@/lib/constants";

@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import mongoose from 'mongoose';
 import morgan from 'morgan';
 import { env, isProduction } from './config/env.js';
-import { authenticate } from './middleware/auth.js';
+import { authenticate, requireAdminForWrites } from './middleware/auth.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { doctorRouter } from './modules/doctors/doctor.routes.js';
@@ -39,8 +39,9 @@ export function createApp() {
 
   const api = Router();
   api.use('/auth', authRouter);
-  // Everything below requires a valid session.
+  // Everything below requires a valid session, and writes require the admin role.
   api.use(authenticate);
+  api.use(requireAdminForWrites);
   api.use('/doctors', doctorRouter);
   api.use('/patients', patientRouter);
   api.use('/stats', statsRouter);

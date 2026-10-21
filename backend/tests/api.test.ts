@@ -109,6 +109,24 @@ describe('doctors', () => {
     await viewer.post('/api/v1/doctors').send(doctorInput).expect(403);
   });
 
+  it('blocks every write route for viewers before validation or lookups run', async () => {
+    const id = new mongoose.Types.ObjectId().toString();
+    const writes: Array<[method: 'post' | 'patch' | 'delete', path: string]> = [
+      ['post', '/api/v1/doctors'],
+      ['patch', `/api/v1/doctors/${id}`],
+      ['delete', `/api/v1/doctors/${id}`],
+      ['post', `/api/v1/doctors/${id}/patients`],
+      ['delete', `/api/v1/doctors/${id}/patients/${id}`],
+      ['post', '/api/v1/patients'],
+      ['patch', `/api/v1/patients/${id}`],
+      ['delete', `/api/v1/patients/${id}`],
+    ];
+    for (const [method, path] of writes) {
+      const res = await viewer[method](path).send({});
+      expect(res.status, `${method.toUpperCase()} ${path}`).toBe(403);
+    }
+  });
+
   it('creates a doctor', async () => {
     const res = await admin.post('/api/v1/doctors').send(doctorInput).expect(201);
     doctorId = res.body.data.id;

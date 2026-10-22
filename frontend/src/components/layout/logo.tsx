@@ -1,4 +1,4 @@
-import { Activity } from "lucide-react";
+import { HeartPulse } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -7,7 +7,7 @@ interface LogoProps {
   inverted?: boolean;
 }
 
-/** The brand mark: a pulse line on a teal tile. */
+/** The brand mark: a heart with a pulse line, on a teal tile. */
 export function LogoMark({ className, inverted = false }: LogoProps) {
   return (
     <span
@@ -18,7 +18,7 @@ export function LogoMark({ className, inverted = false }: LogoProps) {
       )}
       aria-hidden="true"
     >
-      <Activity className="size-4" strokeWidth={2.4} />
+      <HeartPulse className="size-4" strokeWidth={2.2} />
     </span>
   );
 }

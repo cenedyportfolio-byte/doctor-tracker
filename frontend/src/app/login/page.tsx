@@ -1,8 +1,9 @@
-import { BarChart3, ShieldCheck, Users } from "lucide-react";
+import { Activity, ShieldPlus, Stethoscope } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { BrandBackdrop } from "@/components/layout/brand-backdrop";
+import { EcgTrace } from "@/components/layout/ecg-trace";
 import { Logo } from "@/components/layout/logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoginForm } from "@/features/auth/login-form";
@@ -10,9 +11,9 @@ import { LoginForm } from "@/features/auth/login-form";
 export const metadata: Metadata = { title: "Sign in" };
 
 const FEATURES = [
-  { icon: Users, title: "Doctors & patients", text: "Every doctor and their patient list in one place." },
-  { icon: BarChart3, title: "Live analytics", text: "Admissions, patient load and conditions at a glance." },
-  { icon: ShieldCheck, title: "Secure by default", text: "Role-based access with httpOnly sessions." },
+  { icon: Stethoscope, title: "Doctors & patients", text: "Every doctor and their patient list in one place." },
+  { icon: Activity, title: "Live analytics", text: "Admissions, patient load and conditions at a glance." },
+  { icon: ShieldPlus, title: "Secure by default", text: "Role-based access with httpOnly sessions." },
 ] as const;
 
 export default function LoginPage() {
@@ -21,6 +22,7 @@ export default function LoginPage() {
       {/* Brand panel */}
       <section className="relative hidden overflow-hidden bg-brand-ink p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <BrandBackdrop />
+        <EcgTrace id="login-ecg" className="absolute inset-x-0 bottom-24 text-teal-300/35" />
 
         <Link href="/" className="relative w-fit rounded-lg">
           <Logo inverted />

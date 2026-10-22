@@ -12,8 +12,8 @@ The project is two separate services: a **Next.js frontend** and a **standalone 
 
 | | |
 |---|---|
-| Live app | https://doctor-tracker-psi.vercel.app |
-| Live API | https://doctor-tracker-api-indol.vercel.app/health (REST base path `/api/v1`) |
+| Live app | https://doctor-tracker-six.vercel.app |
+| Live API | https://doctor-tracker-api-sigma.vercel.app/health (REST base path `/api/v1`) |
 | Frontend code | https://github.com/cenedyportfolio-byte/doctor-tracker/tree/main/frontend |
 | Backend code | https://github.com/cenedyportfolio-byte/doctor-tracker/tree/main/backend |
 

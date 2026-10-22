@@ -2,7 +2,7 @@
 
 The Next.js client for Doctor Tracker: landing page, sign-in, dashboard, doctors and patients. It talks to the separate [backend API](../backend) over REST.
 
-**Live:** https://doctor-tracker-psi.vercel.app (demo accounts are listed in the [main README](../README.md#links))
+**Live:** https://doctor-tracker-six.vercel.app (demo accounts are listed in the [main README](../README.md#links))
 
 Architecture, technical decisions, query plans and screenshots are in the [main README](../README.md).
 

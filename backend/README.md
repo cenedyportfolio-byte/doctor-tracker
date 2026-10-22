@@ -2,7 +2,7 @@
 
 The standalone Express REST API for Doctor Tracker. It owns all data access and business rules over MongoDB; the [frontend](../frontend) is a separate client.
 
-**Live:** https://doctor-tracker-api-indol.vercel.app/health · REST base path `/api/v1`
+**Live:** https://doctor-tracker-api-sigma.vercel.app/health · REST base path `/api/v1`
 
 Architecture, the full API reference, index list and query plans are in the [main README](../README.md).
 

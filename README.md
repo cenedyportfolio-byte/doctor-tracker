@@ -8,6 +8,15 @@ Doctor Tracker is a secure administrative web application for managing doctors a
 
 The project is two separate services: a **Next.js frontend** and a **standalone Express REST API** over MongoDB. The focus is on index-backed queries, a plain and predictable admin UI, and clear data visualization.
 
+## Links
+
+| | |
+|---|---|
+| Live app | https://doctor-tracker-psi.vercel.app |
+| Live API | https://doctor-tracker-api-indol.vercel.app/health (REST base path `/api/v1`) |
+| Frontend code | https://github.com/cenedyportfolio-byte/doctor-tracker/tree/main/frontend |
+| Backend code | https://github.com/cenedyportfolio-byte/doctor-tracker/tree/main/backend |
+
 **Demo accounts** (created by `npm run seed`):
 
 | Role | Email | Password | Can do |
@@ -19,6 +28,7 @@ The sign-in page has Admin and Viewer buttons that fill these in.
 
 ### Contents
 
+- [Links](#links)
 - [Features](#features)
 - [Setup Guide](#setup-guide)
 - [System Architecture](#system-architecture)

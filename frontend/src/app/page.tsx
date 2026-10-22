@@ -1,12 +1,13 @@
 import {
+  Activity,
   ArrowRight,
-  BarChart3,
   Check,
+  ClipboardPlus,
+  Hospital,
   LockKeyhole,
   MonitorSmartphone,
-  ShieldCheck,
+  ShieldPlus,
   Stethoscope,
-  Users,
   Zap,
 } from "lucide-react";
 import type { Metadata } from "next";
@@ -15,7 +16,10 @@ import Link from "next/link";
 import dashboardShot from "@/assets/landing-dashboard.png";
 import mobileShot from "@/assets/landing-mobile.png";
 import { BrandBackdrop } from "@/components/layout/brand-backdrop";
+import { EcgTrace } from "@/components/layout/ecg-trace";
 import { Logo } from "@/components/layout/logo";
+import { SPECIALIZATIONS } from "@/lib/constants";
+import { SPECIALIZATION_ICONS } from "@/lib/specialization-icons";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -36,7 +40,7 @@ const SCREENS = [
     ],
   },
   {
-    icon: Users,
+    icon: ClipboardPlus,
     title: "Patients",
     text: "Every patient record, searchable and filterable from one list.",
     items: [
@@ -46,7 +50,7 @@ const SCREENS = [
     ],
   },
   {
-    icon: BarChart3,
+    icon: Activity,
     title: "Dashboard",
     text: "The numbers that matter, charted from live data.",
     items: [
@@ -59,7 +63,7 @@ const SCREENS = [
 
 const HIGHLIGHTS = [
   {
-    icon: ShieldCheck,
+    icon: ShieldPlus,
     title: "Role-based access",
     text: "Admins add, edit and delete. Viewers get a read-only view, enforced by the API, not just hidden buttons.",
   },
@@ -123,7 +127,7 @@ export default function LandingPage() {
 
           <div className="relative mx-auto max-w-6xl px-4 pt-12 pb-14 text-center sm:px-6 sm:pt-20 sm:pb-16">
             <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-teal-100 ring-1 ring-white/15">
-              <span className="size-1.5 rounded-full bg-teal-300" aria-hidden="true" />
+              <Hospital className="size-3.5 text-teal-300" aria-hidden="true" />
               Admin portal for hospital staff
             </p>
             <h1 className="mx-auto mt-5 max-w-3xl text-4xl leading-[1.1] font-bold tracking-tight text-balance sm:text-6xl">
@@ -144,6 +148,8 @@ export default function LandingPage() {
             </div>
             <p className="mt-4 text-xs text-teal-50/70">Demo admin and viewer accounts are on the sign-in page.</p>
           </div>
+
+          <EcgTrace id="hero-ecg" className="relative -mt-10 -mb-6 text-teal-300/40" />
 
           {/* Product preview: the desktop dashboard with a phone beside it; phones see the phone view only. */}
           <div className="relative mx-auto max-w-6xl px-4 pb-10 sm:px-6 md:pb-16">
@@ -212,6 +218,30 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section aria-labelledby="specialties-heading" className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
+          <h2 id="specialties-heading" className="text-2xl font-bold tracking-tight text-foreground">
+            Organised by specialty
+          </h2>
+          <p className="mt-2 max-w-2xl text-base text-muted">
+            Every doctor belongs to one of twelve specialties, so the directory narrows to a single department in one
+            click.
+          </p>
+          <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {SPECIALIZATIONS.map((name) => {
+              const Icon = SPECIALIZATION_ICONS[name];
+              return (
+                <li
+                  key={name}
+                  className="flex items-center gap-3 rounded-lg border border-border bg-surface px-3.5 py-3 text-sm font-medium text-foreground"
+                >
+                  <Icon className="size-[18px] shrink-0 text-primary" aria-hidden="true" />
+                  {name}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
         <section id="highlights" className="scroll-mt-6 border-y border-border bg-surface">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
             <h2 className="text-2xl font-bold tracking-tight text-foreground">Why it&apos;s solid</h2>
@@ -230,6 +260,7 @@ export default function LandingPage() {
         <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <div className="relative overflow-hidden rounded-2xl bg-brand-ink px-6 py-14 text-center text-white sm:px-12">
             <BrandBackdrop />
+            <EcgTrace id="cta-ecg" className="absolute inset-x-0 bottom-3 text-teal-300/30" />
             <h2 className="relative text-2xl font-bold tracking-tight sm:text-3xl">Take a look around</h2>
             <p className="relative mx-auto mt-3 max-w-xl text-teal-50/80">
               Sign in with the demo admin account for full access, or the viewer account to see the read-only

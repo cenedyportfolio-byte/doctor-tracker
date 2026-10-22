@@ -15,6 +15,8 @@ The project is two separate services: a **Next.js frontend** and a **standalone 
 | Admin | `admin@doctortracker.dev` | `Admin@12345` | Everything |
 | Viewer | `viewer@doctortracker.dev` | `Viewer@12345` | Read only. Write controls are hidden and the API answers writes with 403. |
 
+The sign-in page has Admin and Viewer buttons that fill these in.
+
 ### Contents
 
 - [Features](#features)
@@ -40,7 +42,7 @@ The project is two separate services: a **Next.js frontend** and a **standalone 
 | **A doctor's patients** | The doctor page shows contact details, the patient mix by condition, and that doctor's own searchable, filterable, paginated patient list. **Add a patient under the doctor** with `POST /doctors/:id/patients`. **Remove a patient from the doctor's list** with `DELETE /doctors/:id/patients/:patientId`, which only succeeds if the patient belongs to that doctor. A doctor who still has patients can't be deleted; the UI says so before you try. |
 | **Patients** | List, create, **edit** (including reassigning the doctor) and delete. **Search** by name, diagnosis, phone or email. **Filters**: condition, doctor, gender, age range and admission-date range. **Sorting** and **pagination**. Tapping a row opens a read-only details panel with Edit and Delete for admins. |
 | **Dashboard** | Four stat tiles: doctors, patients, critical patients, and admissions in the selected period compared with the previous period. Three charts: **patients per doctor** (top 10), **patients over time** (admissions per day, with a 7D / 30D / 90D toggle) and **patients by condition**. Bars link to the doctor or to the filtered patient list, and every chart can switch to a table view. |
-| **UI** | A fixed sidebar (Dashboard, Doctors, Patients) and a slim top bar with the user and Log out. On phones the sidebar becomes a drawer. Lists put the toolbar (search, filters, sort, primary action) above the table and pagination below; phones show fewer columns. Create and edit open in dialogs, deletes ask for confirmation, and results show as toasts. Every list and chart has a loading skeleton, an empty state and an error state with retry. |
+| **UI** | A public landing page and a split-screen sign-in page share the brand: a dark teal panel, the logo and a product preview. Inside the app, a fixed sidebar (Dashboard, Doctors, Patients) and a slim top bar with the user and Log out. On phones the sidebar becomes a drawer. Lists put the toolbar (search, filters, sort, primary action) above the table and pagination below; phones show fewer columns. Create and edit open in dialogs, deletes ask for confirmation, and results show as toasts. Every list and chart has a loading skeleton, an empty state and an error state with retry. |
 | **Validation and errors** | Zod on both sides. The API rejects unknown fields (no mass assignment), invalid ids (400), duplicates (409) and malformed JSON, all in one error format that the forms map back onto fields. |
 
 ---
@@ -266,7 +268,7 @@ List responses have the shape `{ data: T[], meta: { page, limit, total, totalPag
 - **One dashboard endpoint.** `/stats/overview` runs its queries in parallel and returns everything the page needs. The aggregations are shaped to be answered from indexes alone (next section). `$lookup` runs after `$limit`, so only 10 doctors are joined. The result is cached in-process for 60 seconds; concurrent requests share one in-flight computation, and every write through the API clears the cache.
 - **Accurate patient counts.** Instead of a denormalized `patientCount` that can drift, the doctors list counts patients only for the doctors on the current page, with one covered `$group` on the `{doctor, …}` index.
 - **Accessible primitives without a UI library.** The native `<dialog>` element (modal, side panel and drawer variants) gives a browser-managed focus trap, an inert background and Escape to close. The doctor picker follows the WAI-ARIA combobox pattern, focus rings are visible, conditions always show a text label next to the colored dot, and every chart has a table view. An axe-core audit at 390, 768, 1024, 1280 and 1440 px reports no violations.
-- **A deliberately plain UI.** One font, neutral greys and 1 px borders. One accent color, used only for the primary button and the active nav item. Status colors encode patient condition and nothing else, always next to a text label or legend. There's a single light theme, so every screen is tested in the one theme users actually get.
+- **Branded entry, plain workspace.** The landing and sign-in pages carry the brand: a dark teal panel with soft glows, the logo, and real screenshots of the app. The screens people work in stay deliberately plain: one font, neutral greys, 1 px borders, and one accent color used only for primary buttons and the active nav item. Status colors encode patient condition and nothing else, always next to a text label or legend. There's a single light theme, so every screen is tested in the one theme users actually get.
 - **Next.js 16 Cache Components.** The app shells are prerendered at build time. Request-dependent pieces (`useSearchParams`, `usePathname` on dynamic routes) sit inside Suspense boundaries. Session-dependent UI renders only after hydration, which avoids server/client mismatches.
 
 ---
@@ -366,6 +368,10 @@ Screenshots come from the production build (`next build && next start`) with the
 |---|---|---|
 | ![Mobile doctor profile](docs/screenshots/mobile-doctor-profile.png) | ![Mobile patients](docs/screenshots/mobile-patients.png) | ![Mobile patient details](docs/screenshots/mobile-patient-details.png) |
 
+| Landing page | Sign in |
+|---|---|
+| ![Mobile landing page](docs/screenshots/mobile-landing.png) | ![Mobile sign in](docs/screenshots/mobile-login.png) |
+
 ---
 
 ## Testing
@@ -432,13 +438,14 @@ The frontend is checked with `tsc` and ESLint (`next/core-web-vitals` plus TypeS
     ├── src/
     │   ├── proxy.ts              # route protection (JWT verification)
     │   ├── app/                  # routes only: / (landing), login, (app)/dashboard, doctors, doctors/[id], patients
+    │   ├── assets/               # product screenshots shown on the landing page
     │   ├── features/             # domain code: data hooks and components per feature
     │   │   └── auth/  dashboard/  doctors/  patients/
     │   ├── components/
     │   │   ├── ui/               # button, input, select, dialog, table, pagination, states, …
     │   │   ├── filters/          # list toolbar, filter panel, chips, date range
     │   │   ├── charts/           # chart card (loading, empty, error, table view), tooltip
-    │   │   └── layout/           # sidebar, top bar, nav, page skeletons
+    │   │   └── layout/           # logo, brand backdrop, sidebar, top bar, nav, page skeletons
     │   ├── hooks/                # URL state, debounce, hydration
     │   └── lib/                  # API client, query client and keys, constants, utils
     └── Dockerfile

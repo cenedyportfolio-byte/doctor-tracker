@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Stethoscope, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
@@ -12,6 +12,7 @@ import { useCanEdit } from "@/features/auth/api";
 import { PatientList } from "@/features/patients/patient-list";
 import { ApiError } from "@/lib/api-client";
 import { CONDITION_META, CONDITIONS_BY_SEVERITY } from "@/lib/constants";
+import { SPECIALIZATION_ICONS } from "@/lib/specialization-icons";
 import { formatDate, formatNumber, formatRelative } from "@/lib/utils";
 import { useDoctor } from "./api";
 import { DeleteDoctorDialog } from "./delete-doctor-dialog";
@@ -33,6 +34,7 @@ export function DoctorDetailView({ id }: { id: string }) {
       <Card>
         {notFound ? (
           <EmptyState
+            icon={Stethoscope}
             title="Doctor not found"
             description="This doctor may have been removed, or the link is incorrect."
             action={
@@ -67,11 +69,14 @@ export function DoctorDetailView({ id }: { id: string }) {
 
       <Card className="p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-xl font-semibold text-foreground">{doctor.name}</h1>
-            <p className="mt-0.5 text-sm text-muted">
-              {doctor.specialization} · {doctor.hospital}
-            </p>
+          <div className="flex min-w-0 items-center gap-3.5">
+            <SpecializationMark specialization={doctor.specialization} />
+            <div className="min-w-0">
+              <h1 className="text-xl font-semibold text-foreground">{doctor.name}</h1>
+              <p className="mt-0.5 text-sm text-muted">
+                {doctor.specialization} · {doctor.hospital}
+              </p>
+            </div>
           </div>
           {canEdit && (
             <div className="flex gap-2">
@@ -199,5 +204,14 @@ export function DoctorDetailSkeleton() {
       </Card>
       <Card className="h-96" />
     </div>
+  );
+}
+
+function SpecializationMark({ specialization }: { specialization: DoctorDetail["specialization"] }) {
+  const Icon = SPECIALIZATION_ICONS[specialization] ?? Stethoscope;
+  return (
+    <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+      <Icon className="size-5" aria-hidden="true" />
+    </span>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { ClipboardPlus, Plus, SearchX } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { describeDateRange } from "@/components/filters/date-range-filter";
@@ -199,6 +199,7 @@ export function PatientList({ doctor }: PatientListProps) {
           ) : patients.length === 0 ? (
             activeFilters.length > 0 ? (
               <EmptyState
+                icon={SearchX}
                 title="No patients match your filters"
                 description="Try a different search term or remove some filters."
                 action={
@@ -209,6 +210,7 @@ export function PatientList({ doctor }: PatientListProps) {
               />
             ) : (
               <EmptyState
+                icon={ClipboardPlus}
                 title={scoped ? "No patients assigned yet" : "No patients yet"}
                 description={scoped ? "Patients added under this doctor will appear here." : undefined}
               />

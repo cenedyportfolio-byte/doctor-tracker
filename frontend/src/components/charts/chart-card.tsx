@@ -12,14 +12,11 @@ interface ChartCardProps {
   description?: ReactNode;
   action?: ReactNode;
   legend?: ReactNode;
-  /** Accessible table view of the same data, toggled from the header. */
   table?: ReactNode;
-  /** Every chart renders its own loading, empty and error state. */
   status: ChartStatus;
   error?: unknown;
   onRetry?: () => void;
   emptyMessage?: string;
-  /** Height of the plot area, so the skeleton and states don't shift the layout. */
   height: number;
   className?: string;
   children: ReactNode;

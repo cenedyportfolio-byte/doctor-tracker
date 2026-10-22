@@ -15,7 +15,6 @@ interface PatientDetailsSheetProps {
   onDelete: (patient: Patient) => void;
 }
 
-/** Read-only view of one patient, opened by tapping a row; admins can edit or delete from here. */
 export function PatientDetailsSheet({ patient, canEdit, onClose, onEdit, onDelete }: PatientDetailsSheetProps) {
   return (
     <Dialog

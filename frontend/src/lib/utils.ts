@@ -36,7 +36,6 @@ export function formatRelative(value: string | Date): string {
   return date ? `${formatDistanceToNowStrict(date)} ago` : "—";
 }
 
-/** yyyy-MM-dd in local time, for <input type="date"> and API date filters. */
 export function toDateInputValue(value: string | Date = new Date()): string {
   const date = toDate(value);
   return date ? format(date, "yyyy-MM-dd") : "";
@@ -48,14 +47,12 @@ export function pluralize(count: number, singular: string, plural = `${singular}
   return `${formatNumber(count)} ${count === 1 ? singular : plural}`;
 }
 
-/** Start of a local calendar day (yyyy-MM-dd) as an ISO timestamp, for API date filters. */
 export function dayStartIso(day: string | undefined): string | undefined {
   if (!day) return undefined;
   const date = parseISO(day);
   return isValid(date) ? date.toISOString() : undefined;
 }
 
-/** End of a local calendar day (yyyy-MM-dd) as an ISO timestamp, for API date filters. */
 export function dayEndIso(day: string | undefined): string | undefined {
   if (!day) return undefined;
   const date = parseISO(day);

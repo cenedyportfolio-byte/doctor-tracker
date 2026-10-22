@@ -1,13 +1,8 @@
 import "server-only";
 import { jwtVerify, type JWTPayload } from "jose";
 
-/**
- * Session verification for the Next.js proxy. The Express API issues the JWT (HS256) and
- * sets it as an httpOnly cookie; the web app only ever verifies it.
- */
 export const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "dt_session";
 
-// Must match the issuer/audience the API signs with (backend/src/modules/auth/auth.service.ts).
 const ISSUER = "doctor-tracker-api";
 const AUDIENCE = "doctor-tracker";
 

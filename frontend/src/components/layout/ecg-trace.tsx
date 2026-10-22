@@ -1,15 +1,10 @@
 import { cn } from "@/lib/utils";
 
 interface EcgTraceProps {
-  /** Unique per page: the SVG pattern is referenced by id. */
   id: string;
   className?: string;
 }
 
-/**
- * A faint, repeating heartbeat line. It's an SVG pattern rather than a stretched path, so the
- * waveform keeps its shape at any width; the ends fade out.
- */
 export function EcgTrace({ id, className }: EcgTraceProps) {
   return (
     <svg

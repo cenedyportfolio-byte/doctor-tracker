@@ -41,15 +41,10 @@ function redirectToLogin() {
   if (typeof window === "undefined" || redirectingToLogin) return;
   redirectingToLogin = true;
   const next = window.location.pathname + window.location.search;
-  // A full navigation (not router.push) also discards every cached query from the expired session.
   // eslint-disable-next-line @next/next/no-location-assign-relative-destination
   window.location.assign(`/login?next=${encodeURIComponent(next)}&expired=1`);
 }
 
-/**
- * Thin fetch wrapper for the REST API. Requests go to the same origin (`/api/v1/...`) and
- * Next.js proxies them to Express, so the httpOnly session cookie is sent automatically.
- */
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", query, body, signal } = options;
   const search = toSearchParams(query).toString();

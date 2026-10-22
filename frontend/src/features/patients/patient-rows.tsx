@@ -23,11 +23,6 @@ interface PatientsTableProps extends RowActions {
   dimmed?: boolean;
 }
 
-/**
- * Columns appear as space allows: phones show patient + condition (tap a row for the details
- * drawer, which holds edit/delete); wider screens add admission date, actions, doctor and a
- * separate diagnosis column.
- */
 export function PatientsTable({ patients, sort, onSortChange, dimmed, ...actions }: PatientsTableProps) {
   const nameDirection = sort === "name_asc" ? "asc" : sort === "name_desc" ? "desc" : null;
   const admittedDirection = sort === "newest" ? "desc" : sort === "oldest" ? "asc" : null;
@@ -79,7 +74,6 @@ const PatientRow = memo(function PatientRow({
   return (
     <Tr className="relative">
       <Td>
-        {/* The button stretches over the whole row; links and actions sit above it. */}
         <button
           type="button"
           onClick={() => onOpen(patient)}

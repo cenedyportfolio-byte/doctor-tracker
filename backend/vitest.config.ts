@@ -3,7 +3,6 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
-    // Integration tests share one database, so files run one at a time.
     fileParallelism: false,
     testTimeout: 15_000,
     hookTimeout: 30_000,

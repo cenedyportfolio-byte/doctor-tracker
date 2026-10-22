@@ -1,6 +1,3 @@
-// Mirrors backend/src/config/constants.ts. Kept in sync by hand: the lists are small and
-// stable, and duplicating them avoids a request before every form can render.
-
 export const SPECIALIZATIONS = [
   "Cardiology",
   "Dermatology",
@@ -20,7 +17,6 @@ export type Specialization = (typeof SPECIALIZATIONS)[number];
 export const CONDITIONS = ["stable", "under_observation", "critical", "recovering", "discharged"] as const;
 export type Condition = (typeof CONDITIONS)[number];
 
-/** Label and status colour (dots in tables, bars on the dashboard) per condition. */
 export const CONDITION_META: Record<Condition, { label: string; chartColor: string }> = {
   critical: {
     label: "Critical",
@@ -44,7 +40,6 @@ export const CONDITION_META: Record<Condition, { label: string; chartColor: stri
   },
 };
 
-/** Severity order used for lists and charts (most urgent first). */
 export const CONDITIONS_BY_SEVERITY: Condition[] = [
   "critical",
   "under_observation",

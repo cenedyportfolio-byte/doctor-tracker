@@ -5,7 +5,6 @@ import { SearchInput } from "@/components/ui/search-input";
 import { Select } from "@/components/ui/select";
 
 interface ListToolbarProps<S extends string> {
-  /** Remount key for the search box (bumped when filters are cleared from outside). */
   searchKey: number;
   search?: string;
   onSearch: (search: string) => void;
@@ -17,11 +16,9 @@ interface ListToolbarProps<S extends string> {
   sortOptions: ReadonlyArray<{ value: S; label: string }>;
   onSortChange: (sort: S) => void;
   sortLabel: string;
-  /** The list's primary action, e.g. "Add doctor" (omitted for read-only users). */
   action?: ReactNode;
 }
 
-/** Search, filters, sort and the primary action above a list. */
 export function ListToolbar<S extends string>({
   searchKey,
   search,

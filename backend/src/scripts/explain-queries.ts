@@ -1,13 +1,3 @@
-/**
- * Prints MongoDB query plans for the API's hot queries as a markdown table.
- *
- *   npm run explain
- *
- * The queries are built with the same functions the services use (filter builders, sort
- * specs, aggregation pipelines), so the numbers describe what the API actually runs.
- * Look for: index scans (IXSCAN / COUNT_SCAN) instead of COLLSCAN, and docsExamined close to
- * nReturned. "docsExamined 0" means the query was answered from the index alone.
- */
 import type { Aggregate, Query } from 'mongoose';
 import { connectDatabase, disconnectDatabase } from '../config/db.js';
 import { Doctor } from '../modules/doctors/doctor.model.js';
@@ -31,7 +21,6 @@ interface CursorExplain {
   executionStats: { nReturned: number; totalKeysExamined: number; totalDocsExamined: number; executionTimeMillis: number };
 }
 
-// find() explains are flat; aggregate() explains nest the cursor under stages[0].$cursor.
 type ExplainOutput = CursorExplain | { stages: Array<{ $cursor?: CursorExplain; nReturned?: number }> };
 
 function planStages(plan: PlanStage | undefined): string[] {
@@ -65,7 +54,6 @@ async function main() {
   console.log('| Query | Plan | keysExamined | docsExamined | nReturned | ms |');
   console.log('|---|---|---|---|---|---|');
 
-  // Doctors list (GET /doctors)
   for (const [label, input] of [
     ['Doctors: default list, page 1', {}],
     ['Doctors: default list, page 3', { page: '3' }],
@@ -83,7 +71,6 @@ async function main() {
     ]),
   );
 
-  // Patients list (GET /patients)
   for (const [label, input] of [
     ['Patients: default list, page 1', {}],
     ['Patients: search "a" + condition + date + gender + age', { search: 'a', condition: 'stable,recovering', from: since, gender: 'female', minAge: '30', maxAge: '70' }],
@@ -101,7 +88,6 @@ async function main() {
     await row("Patients: one doctor's list", Patient.find(buildPatientFilter(own, String(sample.doctor))).sort(PATIENT_SORT_SPECS.newest).limit(10).lean());
   }
 
-  // Dashboard (GET /stats/overview) and doctor profile (GET /doctors/:id)
   const { start, previousStart, now } = stats.resolvePeriod('90d');
   await row('Dashboard: admissions trend (90d)', Patient.aggregate(stats.admissionsPipeline(start, previousStart, now)));
   await row('Dashboard: patients per condition', Patient.aggregate(stats.conditionCountsPipeline()));

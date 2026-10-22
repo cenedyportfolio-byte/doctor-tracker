@@ -11,7 +11,6 @@ interface FilterChipsProps {
   onClearAll: () => void;
 }
 
-/** Shows every active filter as a removable chip, so the current query is always visible. */
 export function FilterChips({ filters, onClearAll }: FilterChipsProps) {
   if (filters.length === 0) return null;
 

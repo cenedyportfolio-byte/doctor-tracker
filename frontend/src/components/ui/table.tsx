@@ -30,7 +30,6 @@ export function Th({ className, ...props }: ComponentProps<"th">) {
 
 interface SortableThProps {
   children: ReactNode;
-  /** Current direction for this column, or null when the list is sorted by another column. */
   direction: "asc" | "desc" | null;
   onSort: () => void;
   className?: string;
@@ -71,7 +70,6 @@ export function Tr({ className, ...props }: ComponentProps<"tr">) {
   );
 }
 
-/** Placeholder rows shown while a list loads; mirrors the table's row height. */
 export function TableSkeleton({ rows = 8, label }: { rows?: number; label: string }) {
   return (
     <div className="divide-y divide-border border-t border-border" role="status" aria-label={label}>

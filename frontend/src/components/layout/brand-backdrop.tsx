@@ -1,4 +1,3 @@
-/** Two soft glows and a faint grid, layered over a `bg-brand-ink` container (sign-in panel, landing hero). */
 export function BrandBackdrop() {
   return (
     <>

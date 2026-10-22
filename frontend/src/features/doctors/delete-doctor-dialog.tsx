@@ -16,7 +16,6 @@ interface DeleteDoctorDialogProps {
 export function DeleteDoctorDialog({ doctor, onClose, onDeleted }: DeleteDoctorDialogProps) {
   const deleteDoctor = useDeleteDoctor();
 
-  // The API refuses to orphan patients; say so up front instead of failing on submit.
   if (doctor && doctor.patientCount > 0) {
     return (
       <Dialog

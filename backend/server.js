@@ -1,11 +1,3 @@
-/**
- * Vercel entry point. Vercel's zero-config Express support looks for a root `server.js` that
- * imports `express` and default-exports an app. It imports the compiled output in `dist/`
- * (Vercel runs `npm run build` first), so type-checking stays with our own `tsc` settings.
- *
- * Each instance serves many requests (Fluid Compute), so the database connection is opened
- * once and reused. Local development and Docker use `src/index.ts` instead.
- */
 import express from 'express';
 import { createApp } from './dist/app.js';
 import { connectDatabase } from './dist/config/db.js';
@@ -14,7 +6,7 @@ let connection;
 
 function ensureDatabase(_req, res, next) {
   connection ??= connectDatabase().catch((error) => {
-    connection = undefined; // retry on the next request instead of caching the failure
+    connection = undefined;
     throw error;
   });
   connection.then(

@@ -5,11 +5,9 @@ interface ToggleGroupProps<T extends string> {
   options: ReadonlyArray<{ value: T; label: string }>;
   value: T[];
   onChange: (value: T[]) => void;
-  /** Single choice (radios, with an "Any" option) instead of multiple checkboxes. */
   single?: boolean;
 }
 
-/** A labelled group of native checkboxes (or radios) for filter panels. */
 export function ToggleGroup<T extends string>({ label, options, value, onChange, single }: ToggleGroupProps<T>) {
   const name = useId();
 

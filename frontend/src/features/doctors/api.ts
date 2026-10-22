@@ -34,11 +34,9 @@ export function useDoctors(params: DoctorListParams) {
   const queryClient = useQueryClient();
   const query = useQuery({
     ...doctorListQuery(params),
-    // Keep showing the current page while the next one loads: no flicker or layout jump.
     placeholderData: keepPreviousData,
   });
 
-  // Warm the cache for the next page so "Next" feels instant.
   const hasNextPage = query.data?.meta.hasNextPage ?? false;
   useEffect(() => {
     if (hasNextPage) void queryClient.prefetchQuery(doctorListQuery({ ...params, page: params.page + 1 }));
@@ -80,7 +78,6 @@ export function useDoctorOptions(search: string, enabled = true) {
   });
 }
 
-/** Everything a doctor write can affect. */
 function useInvalidateDoctorData() {
   const queryClient = useQueryClient();
   return () =>
@@ -108,11 +105,9 @@ export function useUpdateDoctor(id: string) {
     mutationFn: (input: Partial<DoctorInput>) =>
       api<DataResponse<Doctor>>(`/doctors/${id}`, { method: "PATCH", body: input }).then((r) => r.data),
     onSuccess: async (doctor) => {
-      // Patch the cached profile immediately instead of waiting for a refetch.
       queryClient.setQueryData<DataResponse<DoctorDetail>>(doctorKeys.detail(id), (old) =>
         old ? { data: { ...old.data, ...doctor } } : old,
       );
-      // Patient rows show the doctor's name and specialization.
       await Promise.all([invalidate(), queryClient.invalidateQueries({ queryKey: patientKeys.lists() })]);
     },
   });
@@ -124,8 +119,6 @@ export function useDeleteDoctor() {
   return useMutation({
     mutationFn: (id: string) => api<void>(`/doctors/${id}`, { method: "DELETE" }),
     onSuccess: async (_, id) => {
-      // Mark the profile stale without refetching: the page showing it is navigating away,
-      // and removing it outright would make that still-mounted page refetch a 404.
       await queryClient.invalidateQueries({ queryKey: doctorKeys.detail(id), refetchType: "none" });
       await invalidate();
     },

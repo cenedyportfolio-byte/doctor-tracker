@@ -2,7 +2,6 @@ import { isValidObjectId } from 'mongoose';
 import { z } from 'zod';
 import { ApiError } from './api-error.js';
 
-/** Parses untrusted input with a Zod schema, converting failures into a 400 ApiError. */
 export function parse<T extends z.ZodType>(schema: T, input: unknown): z.output<T> {
   const result = schema.safeParse(input);
   if (!result.success) {
@@ -37,10 +36,6 @@ export const searchQuery = z
 
 const isoDate = z.coerce.date({ error: 'Invalid date' });
 
-/**
- * Accepts `from`/`to` as ISO dates (YYYY-MM-DD or full ISO strings). `to` is made inclusive
- * of the whole day when only a date is supplied.
- */
 export const dateRangeQuery = {
   from: isoDate.optional(),
   to: z
@@ -59,7 +54,6 @@ export const dateRangeQuery = {
     }),
 };
 
-/** Comma separated list (`a,b,c`) or repeated query params (`?x=a&x=b`) → string[] */
 export function listOf<T extends z.ZodType<string, string>>(item: T) {
   return z
     .union([z.string(), z.array(z.string())])

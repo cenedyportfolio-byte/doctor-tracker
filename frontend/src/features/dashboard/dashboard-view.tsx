@@ -19,7 +19,6 @@ export function DashboardView() {
   const { searchParams, update } = useUrlState();
   const range = readEnum<StatsRange>(searchParams, "range", RANGE_VALUES, DEFAULT_RANGE);
   const rangeLabel = STATS_RANGES.find((r) => r.value === range)!.description;
-  // One request feeds every widget; each chart still renders its own loading/empty/error state.
   const { data, error, isPending, isPlaceholderData, refetch } = useOverview(range);
   const status: ChartStatus = isPending ? "loading" : error && !data ? "error" : "ready";
   const retry = useCallback(() => void refetch(), [refetch]);
@@ -58,7 +57,6 @@ export function DashboardView() {
 
 const noop = () => {};
 
-/** Route-level fallback: the same layout with every widget in its loading state. */
 export function DashboardSkeleton() {
   return (
     <div className="space-y-4" role="status" aria-label="Loading dashboard">

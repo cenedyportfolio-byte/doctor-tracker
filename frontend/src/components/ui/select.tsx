@@ -3,7 +3,6 @@ import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 import { controlStyles } from "./input";
 
-/** Native <select>: accessible and mobile-friendly by default, styled to match inputs. */
 export function Select({ className, children, ...props }: ComponentProps<"select">) {
   return (
     <div className={cn("relative", className)}>

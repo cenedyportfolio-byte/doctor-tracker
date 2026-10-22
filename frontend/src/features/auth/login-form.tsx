@@ -19,7 +19,6 @@ const loginSchema = z.object({
 });
 type LoginValues = z.infer<typeof loginSchema>;
 
-// Seeded by `npm run seed`; shown so reviewers can try both roles without looking anything up.
 const DEMO_ACCOUNTS = [
   { label: "Admin", description: "Full access", email: "admin@doctortracker.dev", password: "Admin@12345" },
   { label: "Viewer", description: "Read-only", email: "viewer@doctortracker.dev", password: "Viewer@12345" },

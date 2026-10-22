@@ -39,7 +39,6 @@ export function createApp() {
 
   const api = Router();
   api.use('/auth', authRouter);
-  // Everything below requires a valid session, and writes require the admin role.
   api.use(authenticate);
   api.use(requireAdminForWrites);
   api.use('/doctors', doctorRouter);

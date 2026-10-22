@@ -12,13 +12,10 @@ export interface SessionUser {
   role: Role;
 }
 
-// The Next.js proxy verifies tokens with the same issuer/audience before rendering pages.
 const ISSUER = 'doctor-tracker-api';
 const AUDIENCE = 'doctor-tracker';
 const secret = new TextEncoder().encode(env.JWT_SECRET);
 
-// Compared against when the email is unknown so both branches cost one bcrypt round,
-// which keeps response timing from revealing which emails are registered.
 const DUMMY_HASH = bcrypt.hashSync('timing-safe-placeholder', 12);
 
 export async function hashPassword(password: string): Promise<string> {
@@ -39,7 +36,6 @@ export async function signSessionToken(user: SessionUser): Promise<{ token: stri
   return { token, expiresAt: new Date((payload.exp ?? 0) * 1000) };
 }
 
-/** Returns the user id from a valid token, or throws 401. */
 export async function verifySessionToken(token: string): Promise<string> {
   try {
     const { payload } = await jwtVerify(token, secret, {
@@ -68,7 +64,6 @@ export async function authenticateCredentials(email: string, password: string): 
   return { id: String(user._id), name: user.name, email: user.email, role: user.role };
 }
 
-/** Loads the current state of a user so revoked or demoted accounts lose access immediately. */
 export async function findSessionUser(userId: string): Promise<SessionUser | null> {
   const user = await User.findById(userId).select('name email role active').lean();
   if (!user || !user.active) return null;

@@ -84,7 +84,6 @@ function DoctorForm({ doctor, onDone }: { doctor: Doctor | null; onDone: () => v
       return;
     }
 
-    // PATCH only what changed.
     const changes = Object.fromEntries(
       FIELDS.filter((field) => dirtyFields[field]).map((field) => [field, values[field]]),
     );

@@ -1,8 +1,3 @@
-/**
- * Query key factories for every server resource. Hierarchical keys make invalidation precise:
- * `doctorKeys.lists()` invalidates every doctor list (any page or filter) but not details.
- * Kept in one module so features can invalidate each other's data without import cycles.
- */
 export const doctorKeys = {
   all: ["doctors"] as const,
   lists: () => [...doctorKeys.all, "list"] as const,

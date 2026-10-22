@@ -7,12 +7,10 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
   JWT_EXPIRES_IN: z.string().default('8h'),
   COOKIE_NAME: z.string().default('dt_session'),
-  // Defaults to true in production. Set to "false" only when serving over plain HTTP.
   COOKIE_SECURE: z
     .enum(['true', 'false'])
     .optional()
     .transform((value) => (value === undefined ? undefined : value === 'true')),
-  // Comma-separated list of browser origins allowed to call the API directly.
   CORS_ORIGINS: z
     .string()
     .default('http://localhost:3000')
@@ -22,7 +20,6 @@ const envSchema = z.object({
         .map((origin) => origin.trim())
         .filter(Boolean),
     ),
-  // Express "trust proxy" setting. The Next.js rewrite proxy sits in front of the API.
   TRUST_PROXY: z.string().default('loopback, linklocal, uniquelocal'),
   STATS_CACHE_TTL_SECONDS: z.coerce.number().int().min(0).default(60),
 });

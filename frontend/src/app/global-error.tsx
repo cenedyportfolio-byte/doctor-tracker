@@ -1,9 +1,5 @@
 "use client";
 
-/**
- * Last-resort boundary for errors in the root layout. It replaces the whole document, so it
- * renders its own <html>/<body> and uses inline styles (global CSS is not loaded here).
- */
 export default function GlobalError({ error, retry }: { error: unknown; retry: () => void }) {
   const digest = error instanceof Error ? (error as Error & { digest?: string }).digest : undefined;
 

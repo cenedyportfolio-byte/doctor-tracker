@@ -10,7 +10,6 @@ function readAge(params: URLSearchParams, key: string): number | undefined {
   return Number.isFinite(value) && value >= 0 && value <= 120 ? value : undefined;
 }
 
-/** Patient list state, parsed from (and written to) the URL query string. */
 export function usePatientListParams() {
   const { searchParams, update, reset } = useUrlState();
 

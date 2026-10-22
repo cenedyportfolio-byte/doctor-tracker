@@ -27,7 +27,6 @@ export const metadata: Metadata = {
   description: "Secure administrative app for managing doctors and their patients, with analytics.",
 };
 
-// Each card describes a screen that exists in the app, in the terms the app uses.
 const SCREENS = [
   {
     icon: Stethoscope,
@@ -89,7 +88,6 @@ const lightButton =
 const outlineButton =
   "inline-flex h-11 items-center justify-center rounded-lg px-5 text-sm font-semibold text-white ring-1 ring-white/30 transition-colors hover:bg-white/10";
 
-/** Public landing page. Signed-in users are redirected to the dashboard by `src/proxy.ts`. */
 export default function LandingPage() {
   return (
     <div className="relative min-h-dvh bg-background">
@@ -122,7 +120,6 @@ export default function LandingPage() {
       <main>
         <section className="relative overflow-hidden bg-brand-ink pt-16 text-white">
           <BrandBackdrop />
-          {/* The lower part of the product preview sits on the page background. */}
           <div className="absolute inset-x-0 bottom-0 h-40 bg-background md:h-44" aria-hidden="true" />
 
           <div className="relative mx-auto max-w-6xl px-4 pt-12 pb-14 text-center sm:px-6 sm:pt-20 sm:pb-16">
@@ -151,7 +148,6 @@ export default function LandingPage() {
 
           <EcgTrace id="hero-ecg" className="relative -mt-10 -mb-6 text-teal-300/40" />
 
-          {/* Product preview: the desktop dashboard with a phone beside it; phones see the phone view only. */}
           <div className="relative mx-auto max-w-6xl px-4 pb-10 sm:px-6 md:pb-16">
             <div className="relative hidden md:block">
               <figure className="relative overflow-hidden rounded-xl bg-surface shadow-2xl ring-1 ring-black/10">

@@ -10,23 +10,13 @@ interface DialogProps {
   description?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
-  /**
-   * `modal` is centered; `sheet` slides in from the right (bottom on small screens);
-   * `drawer` slides in from the left at full height (navigation on small screens).
-   */
   variant?: "modal" | "sheet" | "drawer";
   size?: "sm" | "md" | "lg";
-  /** Blocks closing via Escape / backdrop, e.g. while a request is in flight. */
   dismissible?: boolean;
 }
 
 const MODAL_SIZES = { sm: "sm:max-w-md", md: "sm:max-w-lg", lg: "sm:max-w-2xl" } as const;
 
-/**
- * Accessible dialog built on the native <dialog> element: the browser provides the focus
- * trap, inert background, Escape handling and top-layer stacking.
- * Content is only mounted while open, so forms inside start fresh every time.
- */
 export function Dialog({
   open,
   onClose,
@@ -63,14 +53,13 @@ export function Dialog({
       aria-labelledby={titleId}
       aria-describedby={description ? descriptionId : undefined}
       onCancel={(event) => {
-        event.preventDefault(); // keep React state as the source of truth
+        event.preventDefault();
         requestClose();
       }}
       onPointerDown={(event) => {
         pointerDownOnBackdrop.current = event.target === event.currentTarget;
       }}
       onClick={(event) => {
-        // Only close when the whole click happened on the backdrop (not a text-selection drag).
         if (pointerDownOnBackdrop.current && event.target === event.currentTarget) requestClose();
       }}
       className={cn(

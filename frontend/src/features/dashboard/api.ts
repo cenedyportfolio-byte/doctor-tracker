@@ -26,13 +26,11 @@ export interface Overview {
   }>;
 }
 
-/** All dashboard data in one request; the API computes it with parallel aggregations. */
 export function useOverview(range: StatsRange) {
   return useQuery({
     queryKey: statsKeys.overview(range),
     queryFn: ({ signal }) => api<DataResponse<Overview>>("/stats/overview", { signal, query: { range } }),
     select: (response) => response.data,
-    // Switching ranges keeps the previous charts on screen until the new data arrives.
     placeholderData: keepPreviousData,
     staleTime: 60_000,
   });

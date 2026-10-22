@@ -14,7 +14,6 @@ const patientSchema = new Schema(
     admissionDate: { type: Date, required: true, default: () => new Date() },
     notes: { type: String, trim: true, maxlength: 1000 },
     doctor: { type: Schema.Types.ObjectId, ref: 'Doctor', required: true },
-    // Derived; see lib/search.ts. Never sent to clients.
     searchKeywords: { type: [String], default: [], select: false },
   },
   { timestamps: true },
@@ -24,17 +23,10 @@ patientSchema.pre('validate', function () {
   this.searchKeywords = buildSearchKeywords(this.name, this.email, this.phone, this.diagnosis);
 });
 
-// Sort indexes end in `_id` because every listing sorts with an `_id` tie-breaker.
-// A doctor's patient list (sorted by admission) and the patients-per-doctor aggregation.
 patientSchema.index({ doctor: 1, admissionDate: -1, _id: -1 });
-// Default listing order and the date-range filter. `condition` rides along at the end so the
-// dashboard's admissions trend (date range + critical count) is answered from the index alone.
 patientSchema.index({ admissionDate: -1, _id: -1, condition: 1 });
-// Condition filter + default sort, and condition counts.
 patientSchema.index({ condition: 1, admissionDate: -1, _id: -1 });
-// Alphabetical sorting.
 patientSchema.index({ name: 1, _id: 1 });
-// Prefix search (multikey).
 patientSchema.index({ searchKeywords: 1 });
 
 export type PatientDoc = InferSchemaType<typeof patientSchema> & {

@@ -11,7 +11,6 @@ import {
   searchQuery,
 } from '../../lib/validation.js';
 
-/** Empty strings clear optional fields: '' → null (unset), missing → undefined (unchanged). */
 const clearable = <T extends z.ZodType>(schema: T) =>
   z.union([z.literal('').transform(() => null), z.null(), schema]).optional();
 
@@ -33,7 +32,6 @@ const patientFields = {
   notes: clearable(z.string().trim().max(1000)),
 };
 
-/** Used by POST /doctors/:id/patients, where the doctor comes from the URL. */
 export const createDoctorPatientBody = z.object(patientFields).strict();
 
 export const createPatientBody = z.object({ ...patientFields, doctor: objectId }).strict();

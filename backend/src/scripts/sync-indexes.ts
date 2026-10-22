@@ -1,13 +1,3 @@
-/**
- * Makes the database's indexes match the ones declared on the Mongoose schemas: creates
- * missing indexes and drops ones no longer declared. Data is untouched.
- *
- *   npm run db:sync-indexes          # development (tsx)
- *   npm run db:sync-indexes:prod     # compiled build
- *
- * Mongoose builds missing indexes when the API starts, but never drops old ones, so run this
- * after changing an index definition.
- */
 import mongoose from 'mongoose';
 import { connectDatabase, disconnectDatabase } from '../config/db.js';
 import { Doctor } from '../modules/doctors/doctor.model.js';

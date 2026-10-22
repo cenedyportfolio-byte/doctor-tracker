@@ -107,7 +107,6 @@ function defaultsFor(patient: Patient | null, fixedDoctor?: PickedDoctor): Defau
       doctor: patient.doctor,
     };
   }
-  // Age and gender start empty so they are always chosen deliberately.
   return {
     name: "",
     phone: "",
@@ -161,7 +160,6 @@ function PatientForm({
       return;
     }
 
-    // PATCH only the fields that changed.
     const changes: Partial<PatientInput> = Object.fromEntries(
       FIELDS.filter((field) => dirtyFields[field]).map((field) => [field, input[field]]),
     );

@@ -21,7 +21,6 @@ interface PatientFiltersSheetProps {
   onClose: () => void;
   initial: PatientFilters;
   initialDoctor: PickedDoctor | null;
-  /** Hide the doctor filter when the list is already scoped to one doctor. */
   showDoctor: boolean;
   onApply: (filters: PatientFilters) => void;
 }
@@ -32,7 +31,6 @@ function parseAge(value: string): number | undefined {
   return Number.isFinite(age) ? Math.min(Math.max(age, 0), 120) : undefined;
 }
 
-/** Mount with a fresh `key` each time it opens so the draft starts from the applied filters. */
 export function PatientFiltersSheet({
   open,
   onClose,

@@ -130,7 +130,6 @@ export function DoctorDetailView({ id }: { id: string }) {
   );
 }
 
-/** A <div> wrapping one dt/dd pair is valid inside <dl>. */
 function Detail({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="min-w-0">
@@ -140,7 +139,6 @@ function Detail({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-/** Patients by condition: one proportional bar plus counts with labels (never color alone). */
 function PatientMix({ doctor }: { doctor: DoctorDetail }) {
   const total = doctor.patientCount;
   const active = total - doctor.patientsByCondition.discharged;

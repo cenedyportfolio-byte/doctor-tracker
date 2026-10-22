@@ -1,12 +1,3 @@
-/**
- * Seeds the database with demo users, doctors and patients.
- *
- *   npm run seed            # development
- *   npm run seed:prod -- --force
- *
- * Data is generated from a fixed PRNG seed, so every run produces the same dataset
- * (dates are relative to "now" so the dashboard always has recent activity).
- */
 import mongoose from 'mongoose';
 import {
   PATIENT_CONDITIONS,
@@ -23,7 +14,7 @@ import { User } from '../modules/users/user.model.js';
 
 const DOCTOR_COUNT = 48;
 const PATIENT_COUNT = 1800;
-const HISTORY_DAYS = 760; // two full years, so year-over-year comparisons have data
+const HISTORY_DAYS = 760;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const DEMO_USERS = [
@@ -31,7 +22,6 @@ const DEMO_USERS = [
   { name: 'Victor Viewer', email: 'viewer@doctortracker.dev', password: 'Viewer@12345', role: 'viewer' as const },
 ];
 
-// Mulberry32: tiny deterministic PRNG.
 function createRandom(seed: number) {
   let a = seed;
   const next = () => {
@@ -127,11 +117,10 @@ function slug(value: string): string {
   return value.toLowerCase().replace(/[^a-z]+/g, '');
 }
 
-/** Admissions skew towards recent months (steady growth) with a mild winter peak. */
 function admissionDate(notBefore: Date, now: Date): Date {
   const span = now.getTime() - notBefore.getTime();
   for (;;) {
-    const t = Math.pow(random.next(), 0.75); // bias towards 1 = recent
+    const t = Math.pow(random.next(), 0.75);
     const date = new Date(notBefore.getTime() + t * span);
     const month = date.getUTCMonth();
     const winterBoost = month === 11 || month <= 1 ? 1 : 0.8;
@@ -167,14 +156,12 @@ async function buildDoctors(now: Date) {
     const first = random.pick(random.next() < 0.5 ? FEMALE_NAMES : MALE_NAMES);
     const last = random.pick(LAST_NAMES);
     const hospital = random.pick(HOSPITALS);
-    // Guarantee every specialization is represented, then follow the weights.
     const specialization = i < SPECIALIZATIONS.length ? SPECIALIZATIONS[i]! : random.weighted(specializationEntries);
 
     let email = `${slug(first)}.${slug(last)}@${hospital.domain}`;
     for (let n = 2; usedEmails.has(email); n++) email = `${slug(first)}.${slug(last)}${n}@${hospital.domain}`;
     usedEmails.add(email);
 
-    // Most doctors joined long ago; a handful joined recently.
     const daysAgo = i % 12 === 0 ? random.int(3, 45) : random.int(120, HISTORY_DAYS + 300);
     const createdAt = new Date(now.getTime() - daysAgo * DAY_MS);
 
@@ -185,10 +172,9 @@ async function buildDoctors(now: Date) {
       phone: phoneNumber(),
       email,
     });
-    await doctor.validate(); // also builds searchKeywords via the schema hook
+    await doctor.validate();
     doctors.push({
       doc: { ...doctor.toObject(), createdAt, updatedAt: createdAt },
-      // Patient load varies a lot between doctors, which makes the charts meaningful.
       weight: 0.25 + random.next() * random.next() * 3,
       specialization,
     });
@@ -202,7 +188,6 @@ async function buildPatients(doctors: Awaited<ReturnType<typeof buildDoctors>>, 
 
   for (let i = 0; i < PATIENT_COUNT; i++) {
     const admittedAt = admissionDate(historyStart, now);
-    // Only doctors who had already joined can admit this patient.
     const eligible = doctors.filter((d) => d.doc.createdAt <= admittedAt);
     const doctor = random.weighted((eligible.length ? eligible : doctors).map((d) => [d, d.weight] as const));
     const daysAgo = (now.getTime() - admittedAt.getTime()) / DAY_MS;
@@ -248,7 +233,6 @@ async function main() {
   await User.insertMany(users);
 
   const doctors = await buildDoctors(now);
-  // Raw driver inserts keep the generated createdAt values (Mongoose would overwrite them).
   await Doctor.collection.insertMany(doctors.map((d) => d.doc));
 
   const patients = await buildPatients(doctors, now);

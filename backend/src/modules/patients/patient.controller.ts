@@ -42,8 +42,6 @@ export async function remove(req: Request, res: Response) {
   res.status(204).end();
 }
 
-// Nested under /doctors/:id/patients
-
 export async function listForDoctor(req: Request, res: Response) {
   const { id } = parse(idParams, req.params);
   const query = parse(listPatientsQuery, req.query);

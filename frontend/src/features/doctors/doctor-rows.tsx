@@ -23,14 +23,9 @@ interface DoctorsTableProps extends RowActions {
 
 function usePrefetchDoctor() {
   const queryClient = useQueryClient();
-  // Hovering a row loads the profile in the background, so opening it is instant.
   return useCallback((id: string) => void queryClient.prefetchQuery(doctorDetailQuery(id)), [queryClient]);
 }
 
-/**
- * Columns appear as space allows: phones show doctor + patient count (tap a row to open the
- * profile, where edit/delete live); wider screens add practice, actions, joined date and phone.
- */
 export function DoctorsTable({ doctors, sort, onSortChange, dimmed, ...actions }: DoctorsTableProps) {
   const prefetch = usePrefetchDoctor();
   const nameDirection = sort === "name_asc" ? "asc" : sort === "name_desc" ? "desc" : null;
@@ -82,7 +77,6 @@ const DoctorRow = memo(function DoctorRow({
   return (
     <Tr className="relative" onMouseEnter={() => onHover(doctor.id)}>
       <Td>
-        {/* The link stretches over the whole row; action buttons sit above it. */}
         <Link
           href={`/doctors/${doctor.id}`}
           className="font-medium text-foreground after:absolute after:inset-0 hover:underline"

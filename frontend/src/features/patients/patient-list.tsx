@@ -29,7 +29,6 @@ import type { Patient, PatientSort } from "./types";
 import { usePatientListParams } from "./use-patient-list-params";
 
 interface PatientListProps {
-  /** When set, lists only this doctor's patients and creates new ones under them. */
   doctor?: PickedDoctor;
 }
 
@@ -42,7 +41,6 @@ export function PatientList({ doctor }: PatientListProps) {
   const deletePatient = useDeletePatient();
   const canEdit = useCanEdit();
 
-  // Name for the "Doctor: …" chip when filtering by doctor via the URL.
   const { data: filterDoctor } = useQuery({
     ...doctorDetailQuery(params.doctor ?? ""),
     enabled: !scoped && Boolean(params.doctor),

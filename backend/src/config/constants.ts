@@ -1,6 +1,3 @@
-// Domain enums shared by models, validation schemas and the seed script.
-// The frontend mirrors these in `frontend/src/lib/constants.ts`.
-
 export const ROLES = ['admin', 'viewer'] as const;
 export type Role = (typeof ROLES)[number];
 

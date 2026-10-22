@@ -16,7 +16,6 @@ interface DoctorFiltersSheetProps {
   onApply: (filters: DoctorFilters) => void;
 }
 
-/** Mount with a fresh `key` each time it opens so the draft starts from the applied filters. */
 export function DoctorFiltersSheet({ open, onClose, initial, onApply }: DoctorFiltersSheetProps) {
   const { data: facets } = useDoctorFacets();
   const [specialization, setSpecialization] = useState<Specialization[]>(initial.specialization);

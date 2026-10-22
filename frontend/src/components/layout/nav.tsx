@@ -7,14 +7,9 @@ import { cn } from "@/lib/utils";
 import { NAV_ITEMS, isActive } from "./nav-items";
 
 interface NavLinksProps {
-  /** Called after a link is chosen, e.g. to close the mobile drawer. */
   onNavigate?: () => void;
 }
 
-/**
- * Main navigation. The pathname is request data on dynamic routes (/doctors/[id]), so the
- * active state streams in behind a Suspense boundary instead of blocking the static shell.
- */
 export function NavLinks({ onNavigate }: NavLinksProps) {
   return (
     <Suspense fallback={<NavList pathname={null} onNavigate={onNavigate} />}>

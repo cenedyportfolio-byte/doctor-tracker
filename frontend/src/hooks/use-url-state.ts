@@ -2,13 +2,6 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { toSearchParams, type QueryParams } from "@/lib/api-client";
 
-/**
- * Reads and writes list state (page, filters, sort) in the URL query string.
- *
- * The URL is the single source of truth for list state: it is shareable, survives reloads,
- * and needs no global store. Updates go through `history.replaceState`, which Next.js syncs
- * into `useSearchParams` without a server round trip or a new history entry per keystroke.
- */
 export function useUrlState() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -24,7 +17,6 @@ export function useUrlState() {
         if (value === null) next.delete(key);
         else next.set(key, value);
       }
-      // Any filter change invalidates the current page number.
       if (resetPage && !("page" in patch)) next.delete("page");
 
       const query = next.toString();

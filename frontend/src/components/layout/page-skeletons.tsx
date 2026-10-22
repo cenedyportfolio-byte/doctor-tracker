@@ -2,7 +2,6 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableSkeleton } from "@/components/ui/table";
 
-/** Route-level fallback for the list pages: header, toolbar and table placeholders. */
 export function ListPageSkeleton() {
   return (
     <div className="space-y-4" role="status" aria-label="Loading">

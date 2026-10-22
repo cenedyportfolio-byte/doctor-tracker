@@ -32,19 +32,13 @@ export interface Overview {
 interface Comparison {
   current: number;
   previous: number;
-  /** Percentage change vs. the previous period of equal length; null when previous is 0. */
   changePct: number | null;
 }
-
-// ---------------------------------------------------------------------------------------------
-// Date helpers (all buckets are computed in UTC, matching $dateTrunc below)
-// ---------------------------------------------------------------------------------------------
 
 function startOfUtcDay(date: Date): Date {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
-/** Daily buckets: the last N days including today (UTC). */
 function resolveRange(range: StatsRange, now: Date): Date {
   return startOfUtcDay(new Date(now.getTime() - (RANGE_DAYS[range] - 1) * DAY_MS));
 }
@@ -57,14 +51,8 @@ function compare(current: number, previous: number): Comparison {
   };
 }
 
-// ---------------------------------------------------------------------------------------------
-// Queries. Each one is a single round trip; all of them run in parallel.
-// ---------------------------------------------------------------------------------------------
-
-/** Admissions per bucket for the selected period, plus the previous period's total. */
 export function admissionsPipeline(start: Date, previousStart: Date, now: Date): PipelineStage[] {
   return [
-    // Bounded by the { admissionDate: -1 } index; only two periods' worth of documents are read.
     { $match: { admissionDate: { $gte: previousStart, $lte: now } } },
     {
       $facet: {
@@ -98,22 +86,16 @@ async function admissionsInPeriod(start: Date, previousStart: Date, now: Date) {
   };
 }
 
-/**
- * Patients per condition. Sorting on `condition` first lets MongoDB answer this from the
- * { condition, admissionDate, _id } index alone (covered scan, no documents read).
- */
 export function conditionCountsPipeline(): PipelineStage[] {
   return [{ $sort: { condition: 1 } }, { $group: { _id: '$condition', count: { $sum: 1 } } }];
 }
 
-/** Top 10 doctors by patient count, counted from the { doctor, ... } index alone. */
 export function patientsPerDoctorPipeline(): PipelineStage[] {
   return [
     { $sort: { doctor: 1 } },
     { $group: { _id: '$doctor', patients: { $sum: 1 } } },
     { $sort: { patients: -1, _id: 1 } },
     { $limit: 10 },
-    // Join after $limit, so only 10 doctor lookups happen.
     {
       $lookup: {
         from: 'doctors',
@@ -139,7 +121,6 @@ async function patientDistributions() {
   return { byCondition, topDoctors };
 }
 
-/** Doctors who joined in the current and the previous period (index counts on createdAt). */
 export function joinedFilters(start: Date, previousStart: Date) {
   return {
     current: { createdAt: { $gte: start } },
@@ -150,7 +131,6 @@ export function joinedFilters(start: Date, previousStart: Date) {
 async function doctorCounts(start: Date, previousStart: Date) {
   const joined = joinedFilters(start, previousStart);
   const [total, current, previous] = await Promise.all([
-    // Collection metadata: O(1), exact under normal operation.
     Doctor.estimatedDocumentCount(),
     Doctor.countDocuments(joined.current),
     Doctor.countDocuments(joined.previous),
@@ -158,9 +138,6 @@ async function doctorCounts(start: Date, previousStart: Date) {
   return { total, joined: { current, previous } };
 }
 
-// ---------------------------------------------------------------------------------------------
-
-/** The selected period and the previous period of equal length. */
 export function resolvePeriod(range: StatsRange, now = new Date()) {
   const start = resolveRange(range, now);
   const previousStart = new Date(start.getTime() - (now.getTime() - start.getTime()));
@@ -176,7 +153,6 @@ async function computeOverview(range: StatsRange): Promise<Overview> {
     doctorCounts(start, previousStart),
   ]);
 
-  // Zero-fill so charts get a continuous axis.
   const trendByBucket = new Map(admissions.trend.map((row) => [row._id.getTime(), row]));
   const admissionsTrend: Overview['admissionsTrend'] = [];
   for (let bucket = start; bucket <= now; bucket = new Date(bucket.getTime() + DAY_MS)) {
@@ -230,7 +206,6 @@ export function getOverview(range: StatsRange): Promise<Overview> {
   return overviewCache.getOrSet(range, () => computeOverview(range));
 }
 
-/** Called after every write so the dashboard never shows stale numbers after a change. */
 export function invalidateStats(): void {
   overviewCache.clear();
 }

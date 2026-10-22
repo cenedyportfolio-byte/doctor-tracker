@@ -30,11 +30,9 @@ export function DoctorsView() {
   const [form, setForm] = useState<DoctorFormState>(null);
   const [deleting, setDeleting] = useState<Doctor | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  // Bumped to remount the search box / filter sheet with fresh state.
   const [searchKey, setSearchKey] = useState(0);
   const [filtersKey, setFiltersKey] = useState(0);
 
-  // Stable callbacks keep memoized rows from re-rendering on unrelated state changes.
   const onEdit = useCallback((doctor: Doctor) => setForm({ mode: "edit", doctor }), []);
   const onDelete = useCallback((doctor: Doctor) => setDeleting(doctor), []);
   const onSortChange = useCallback((sort: DoctorSort) => update({ sort }), [update]);
@@ -47,7 +45,6 @@ export function DoctorsView() {
   );
   const onPageSizeChange = useCallback((limit: number) => update({ limit }), [update]);
 
-  // If the current page no longer exists (e.g. after deleting its last row), step back.
   const lastPage = data?.meta.totalPages;
   useEffect(() => {
     if (lastPage && params.page > lastPage) update({ page: lastPage }, { resetPage: false });

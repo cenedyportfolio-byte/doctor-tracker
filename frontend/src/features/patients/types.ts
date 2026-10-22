@@ -37,7 +37,6 @@ export interface PatientInput {
   age: number;
   gender: Gender;
   phone: string;
-  /** Empty string clears the field on update. */
   email: string;
   diagnosis: string;
   condition: Condition;

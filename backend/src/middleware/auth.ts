@@ -8,7 +8,6 @@ import {
   type SessionUser,
 } from '../modules/auth/auth.service.js';
 
-/** Requires a valid session cookie and attaches the current user to `req.user`. */
 export async function authenticate(req: Request, _res: Response, next: NextFunction) {
   const token: unknown = req.cookies?.[env.COOKIE_NAME];
   if (typeof token !== 'string' || !token) throw ApiError.unauthorized();
@@ -21,7 +20,6 @@ export async function authenticate(req: Request, _res: Response, next: NextFunct
   next();
 }
 
-/** Role-based authorization. Must run after `authenticate`. */
 function authorize(...roles: Role[]) {
   return (req: Request, _res: Response, next: NextFunction) => {
     if (!req.user) throw ApiError.unauthorized();
@@ -33,10 +31,6 @@ function authorize(...roles: Role[]) {
 const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const requireAdmin = authorize('admin');
 
-/**
- * Reads are open to every signed-in user; every other method requires the admin role.
- * Mounted once on the API router, so a new write route cannot forget the check.
- */
 export function requireAdminForWrites(req: Request, res: Response, next: NextFunction) {
   if (READ_METHODS.has(req.method)) return next();
   return requireAdmin(req, res, next);

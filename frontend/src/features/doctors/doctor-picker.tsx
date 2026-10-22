@@ -19,10 +19,6 @@ interface DoctorPickerProps {
   clearable?: boolean;
 }
 
-/**
- * Searchable doctor combobox (WAI-ARIA combobox pattern). Options come from a server-side
- * prefix search, so it stays fast however many doctors exist.
- */
 export function DoctorPicker({
   id,
   value,
@@ -53,8 +49,6 @@ export function DoctorPicker({
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [open]);
 
-  // The list is shown as a popover (top layer), so a dialog's scroll area can't clip it.
-  // It is positioned against the input and flips upwards when there's no room below.
   useLayoutEffect(() => {
     const list = listRef.current;
     const anchor = inputRef.current;
@@ -107,7 +101,7 @@ export function DoctorPicker({
       if (option) select(option);
     } else if (event.key === "Escape" && open) {
       event.preventDefault();
-      event.stopPropagation(); // don't close a surrounding dialog
+      event.stopPropagation();
       setOpen(false);
     }
   };
@@ -178,7 +172,7 @@ export function DoctorPicker({
                   id={`${listboxId}-${option.id}`}
                   role="option"
                   aria-selected={selected}
-                  onPointerDown={(e) => e.preventDefault()} // keep focus in the input
+                  onPointerDown={(e) => e.preventDefault()}
                   onClick={() => select(option)}
                   onMouseMove={() => setActiveIndex(index)}
                   className={cn(

@@ -26,7 +26,6 @@ interface DateRangeFilterProps {
   onChange: (value: DateRange) => void;
 }
 
-/** Quick presets plus explicit from/to dates (inclusive, yyyy-MM-dd). */
 export function DateRangeFilter({ label, value, onChange }: DateRangeFilterProps) {
   const id = useId();
   const activePreset = PRESETS.find((p) => !value.to && value.from === presetRange(p).from)?.id;

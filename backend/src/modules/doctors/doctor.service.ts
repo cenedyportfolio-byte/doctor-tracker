@@ -33,11 +33,8 @@ export interface DoctorDetailDTO extends DoctorDTO {
 
 type DoctorRecord = Omit<DoctorDoc, 'searchKeywords'>;
 
-// Exactly the fields the list returns (no __v, no derived search keywords).
 const LIST_FIELDS = 'name specialization hospital phone email createdAt updatedAt';
 
-// `_id` is the tie-breaker so pages are stable when sort keys collide. Each sort matches an
-// index (traversed forwards or backwards), so MongoDB never sorts in memory.
 export const DOCTOR_SORT_SPECS: Record<ListDoctorsQuery['sort'], Record<string, SortOrder>> = {
   newest: { createdAt: -1, _id: -1 },
   oldest: { createdAt: 1, _id: 1 },
@@ -84,11 +81,9 @@ export async function listDoctors(query: ListDoctorsQuery): Promise<Paginated<Do
       .skip(skipFor(query.page, query.limit))
       .limit(query.limit)
       .lean<DoctorRecord[]>(),
-    // Unfiltered totals come from collection metadata instead of counting every document.
     hasFilter ? Doctor.countDocuments(filter) : Doctor.estimatedDocumentCount(),
   ]);
 
-  // Patient counts only for the doctors on this page: one index-backed $group, bounded by `limit`.
   const counts = await countPatientsByDoctor(doctors.map((d) => d._id));
 
   return {
@@ -98,7 +93,6 @@ export async function listDoctors(query: ListDoctorsQuery): Promise<Paginated<Do
 }
 
 export async function getDoctorFacets() {
-  // distinct() on an indexed field is answered from the index (DISTINCT_SCAN).
   const hospitals = await Doctor.distinct('hospital');
   return {
     specializations: [...SPECIALIZATIONS],
@@ -106,7 +100,6 @@ export async function getDoctorFacets() {
   };
 }
 
-/** Lightweight id/name list for pickers. Searchable so it scales past a few hundred doctors. */
 export async function listDoctorOptions(query: DoctorOptionsQuery) {
   const doctors = await Doctor.find({ ...buildSearchFilter(query.search) })
     .select('name specialization hospital')
@@ -122,7 +115,6 @@ export async function listDoctorOptions(query: DoctorOptionsQuery) {
   }));
 }
 
-/** Patient counts by condition and the latest admission for one doctor. */
 export function doctorPatientMixPipeline(doctorId: Types.ObjectId): PipelineStage[] {
   return [
     { $match: { doctor: doctorId } },
@@ -172,7 +164,7 @@ export async function updateDoctor(id: string, input: UpdateDoctorInput): Promis
   if (!doctor) throw ApiError.notFound('Doctor');
 
   doctor.set(input);
-  await doctor.save(); // runs the hook that rebuilds search keywords
+  await doctor.save();
   invalidateStats();
 
   const counts = await countPatientsByDoctor([doctor._id]);

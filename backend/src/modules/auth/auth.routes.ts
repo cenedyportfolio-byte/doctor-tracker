@@ -5,9 +5,6 @@ import { ApiError } from '../../lib/api-error.js';
 import { authenticate } from '../../middleware/auth.js';
 import { login, logout, me } from './auth.controller.js';
 
-// Slows down password guessing; successful logins don't count against the limit.
-// Keyed by IP *and* email: behind a shared proxy many people can appear to come from one IP,
-// and one person's typos shouldn't lock everyone else out.
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,

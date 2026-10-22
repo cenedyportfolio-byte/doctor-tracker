@@ -18,7 +18,6 @@ const doctorFields = {
   email,
 };
 
-// `.strict()` rejects unknown keys, so clients can't write derived or internal fields.
 export const createDoctorBody = z.object(doctorFields).strict();
 
 export const updateDoctorBody = z

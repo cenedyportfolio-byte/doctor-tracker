@@ -35,7 +35,6 @@ function toApiError(err: unknown): ApiError {
     );
   }
 
-  // body-parser errors
   const type = (err as { type?: string } | null)?.type;
   if (type === 'entity.parse.failed') return ApiError.badRequest('Malformed JSON body');
   if (type === 'entity.too.large') return new ApiError(413, 'BAD_REQUEST', 'Request body too large');

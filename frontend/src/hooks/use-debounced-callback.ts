@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
 
-/** Returns a stable, debounced version of `callback` that always calls its latest version. */
 export function useDebouncedCallback<Args extends unknown[]>(callback: (...args: Args) => void, delay: number) {
   const callbackRef = useRef(callback);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);

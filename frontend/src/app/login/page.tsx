@@ -19,7 +19,6 @@ const FEATURES = [
 export default function LoginPage() {
   return (
     <main className="grid min-h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-      {/* Brand panel */}
       <section className="relative hidden overflow-hidden bg-brand-ink p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <BrandBackdrop />
         <EcgTrace id="login-ecg" className="absolute inset-x-0 bottom-24 text-teal-300/35" />
@@ -53,7 +52,6 @@ export default function LoginPage() {
         <p className="relative text-xs text-teal-50/60">Doctor Tracker · Internal use only</p>
       </section>
 
-      {/* Form */}
       <section className="flex items-center justify-center px-5 py-10 sm:px-10">
         <div className="w-full max-w-[400px]">
           <Link href="/" className="mb-10 inline-flex rounded-lg lg:hidden">
@@ -61,7 +59,6 @@ export default function LoginPage() {
           </Link>
           <h1 className="text-[28px] font-bold tracking-tight text-foreground">Welcome back</h1>
           <p className="mt-1.5 mb-8 text-sm text-muted">Sign in to the admin portal to continue.</p>
-          {/* useSearchParams (for ?next=) needs a Suspense boundary to keep the page static. */}
           <Suspense fallback={<LoginFormSkeleton />}>
             <LoginForm />
           </Suspense>

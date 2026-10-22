@@ -1,7 +1,5 @@
 import type { NextConfig } from "next";
 
-// The Express API is never called directly from the browser. `/api/*` is proxied to it, so
-// the session cookie is first-party to the web app's origin and no CORS is involved.
 const apiUrl = (process.env.API_URL ?? "http://localhost:4000").replace(/\/$/, "");
 
 const securityHeaders = [

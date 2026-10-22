@@ -10,7 +10,6 @@ interface StatTileProps {
   label: string;
   value: ReactNode;
   detail: ReactNode;
-  /** Makes the whole tile a link; the link's accessible name is the visible label. */
   href?: string;
 }
 
@@ -45,7 +44,6 @@ interface StatTilesProps {
   rangeLabel: string;
 }
 
-/** Four headline numbers. "Admitted" follows the range chosen on the patients-over-time chart. */
 export function StatTiles({ data, loading, rangeLabel }: StatTilesProps) {
   const placeholder = loading ? <Skeleton className="h-7 w-16" /> : "—";
   const discharged = data?.patientsByCondition.find((row) => row.condition === "discharged")?.count ?? 0;

@@ -9,7 +9,6 @@ import type { Overview } from "./api";
 
 const HEIGHT = 260;
 
-// UTC day buckets from the API → label in UTC so a day never shifts into its neighbour.
 function dayLabel(bucket: string, pattern: string) {
   const date = new Date(bucket);
   return formatDate(new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()), pattern);
@@ -21,7 +20,6 @@ interface Props {
   onRangeChange: (range: StatsRange) => void;
   rangeLabel: string;
   status: ChartStatus;
-  /** True while the newly selected range loads (the previous one stays visible, dimmed). */
   updating: boolean;
   error?: unknown;
   onRetry: () => void;

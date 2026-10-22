@@ -16,7 +16,6 @@ interface Props {
   onRetry: () => void;
 }
 
-/** Bars use the same status colours as the condition dots in the tables, next to text labels. */
 export const PatientsByConditionChart = memo(function PatientsByConditionChart({ data, status, error, onRetry }: Props) {
   const router = useRouter();
   const counts = new Map(data.map((row) => [row.condition, row.count]));

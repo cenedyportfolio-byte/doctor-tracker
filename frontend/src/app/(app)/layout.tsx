@@ -1,7 +1,6 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
 
-/** Authenticated app shell. Access is enforced by `src/proxy.ts` before this renders. */
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="min-h-dvh">

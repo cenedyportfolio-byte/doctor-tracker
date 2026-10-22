@@ -1,14 +1,8 @@
 @import "tailwindcss";
 
-/*
- * Design tokens. Components only use these semantic tokens (bg-surface, text-muted, ...),
- * never raw palette colors.
- */
-
 :root {
   color-scheme: light;
 
-  /* Neutral greys */
   --background: #fafafa;
   --surface: #ffffff;
   --surface-2: #f4f4f5;
@@ -20,13 +14,11 @@
   --subtle: #6b6b74;
   --ring: #3f3f46;
 
-  /* The single accent: primary buttons and the active navigation item only */
   --primary: #0f766e;
   --primary-hover: #115e59;
   --primary-foreground: #ffffff;
   --primary-soft: #f0f7f6;
   --primary-soft-foreground: #0f766e;
-  /* Dark teal behind the sign-in panel and the landing hero */
   --brand-ink: #0b3b38;
 
   --danger: #dc2626;
@@ -34,7 +26,6 @@
   --danger-soft: #fef2f2;
   --danger-soft-foreground: #b91c1c;
 
-  /* Data: neutral marks; status colors only where a value means a patient state */
   --chart-1: #3f3f46;
   --chart-grid: #ededf0;
   --chart-axis: #d4d4d8;
@@ -44,7 +35,6 @@
   --status-info: #2563eb;
   --status-neutral: #a1a1aa;
 
-  /* Elevation for things that float above the page (dialogs, menus, popovers). */
   --shadow-overlay: 0 10px 30px -8px rgb(0 0 0 / 0.18), 0 2px 6px rgb(0 0 0 / 0.06);
 }
 
@@ -123,7 +113,6 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Native modal dialogs: lock page scroll while one is open */
   html:has(dialog[open]:modal) {
     overflow: hidden;
   }

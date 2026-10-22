@@ -3,11 +3,9 @@ import { cn } from "@/lib/utils";
 
 interface LogoProps {
   className?: string;
-  /** Light-on-dark version for the brand panels. */
   inverted?: boolean;
 }
 
-/** The brand mark: a heart with a pulse line, on a teal tile. */
 export function LogoMark({ className, inverted = false }: LogoProps) {
   return (
     <span

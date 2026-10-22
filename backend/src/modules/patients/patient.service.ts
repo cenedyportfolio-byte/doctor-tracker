@@ -34,10 +34,8 @@ type PatientRecord = Omit<PatientDoc, 'searchKeywords' | 'doctor'> & {
 };
 
 const DOCTOR_FIELDS = 'name specialization';
-// Exactly the fields the list returns (no __v, no derived search keywords).
 const LIST_FIELDS = 'name age gender phone email diagnosis condition admissionDate notes doctor createdAt updatedAt';
 
-// `_id` is the tie-breaker so pages are stable when sort keys collide.
 export const PATIENT_SORT_SPECS: Record<ListPatientsQuery['sort'], Record<string, SortOrder>> = {
   newest: { admissionDate: -1, _id: -1 },
   oldest: { admissionDate: 1, _id: 1 },
@@ -102,7 +100,6 @@ export async function listPatients(
       .sort(PATIENT_SORT_SPECS[query.sort])
       .skip(skipFor(query.page, query.limit))
       .limit(query.limit)
-      // One extra `_id: { $in: [...] }` query for the doctors on this page.
       .populate<{ doctor: PopulatedDoctor | null }>('doctor', DOCTOR_FIELDS)
       .lean<PatientRecord[]>(),
     hasFilter ? Patient.countDocuments(filter) : Patient.estimatedDocumentCount(),
@@ -114,7 +111,6 @@ export async function listPatients(
   };
 }
 
-/** Patient counts for a set of doctors in one index-backed aggregation. */
 export async function countPatientsByDoctor(doctorIds: Types.ObjectId[]): Promise<Map<string, number>> {
   if (doctorIds.length === 0) return new Map();
 
@@ -161,16 +157,14 @@ export async function updatePatient(id: string, input: UpdatePatientInput): Prom
 
   const { email, notes, ...rest } = input;
   patient.set(rest);
-  // null clears an optional field, undefined leaves it unchanged.
   if (email !== undefined) patient.set('email', email ?? undefined);
   if (notes !== undefined) patient.set('notes', notes ?? undefined);
 
-  await patient.save(); // runs the hook that rebuilds search keywords
+  await patient.save();
   invalidateStats();
   return findPopulated(patient._id);
 }
 
-/** Deletes a patient. When `doctorId` is given, the patient must belong to that doctor. */
 export async function deletePatient(id: string, options: { doctorId?: string } = {}): Promise<void> {
   const deleted = await Patient.findOneAndDelete({
     _id: id,

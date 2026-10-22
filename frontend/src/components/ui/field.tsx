@@ -11,10 +11,6 @@ interface FieldProps {
   children: ReactNode;
 }
 
-/**
- * Label + control + message. Controls should set `aria-invalid` and
- * `aria-describedby={fieldMessageId(htmlFor)}` so the message is announced.
- */
 export function Field({ label, htmlFor, error, hint, required, className, children }: FieldProps) {
   const message = error ?? hint;
   return (

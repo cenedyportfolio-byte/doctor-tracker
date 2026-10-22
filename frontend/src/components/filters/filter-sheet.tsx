@@ -11,10 +11,6 @@ interface FilterSheetProps {
   children: ReactNode;
 }
 
-/**
- * Side sheet (bottom sheet on phones) holding a draft of the filters. Nothing is fetched
- * until "Show results", so adjusting several filters costs one request.
- */
 export function FilterSheet({ open, onClose, onApply, onReset, description, children }: FilterSheetProps) {
   return (
     <Dialog

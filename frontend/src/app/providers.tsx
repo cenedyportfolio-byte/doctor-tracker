@@ -8,7 +8,6 @@ import { makeQueryClient } from "@/lib/query-client";
 let browserQueryClient: QueryClient | undefined;
 
 function getQueryClient() {
-  // A fresh client per server render keeps requests isolated; the browser reuses one.
   if (typeof window === "undefined") return makeQueryClient();
   browserQueryClient ??= makeQueryClient();
   return browserQueryClient;

@@ -50,7 +50,6 @@ export function ErrorState({ error, onRetry, className }: ErrorStateProps) {
   );
 }
 
-/** Thin indeterminate bar shown while a list refetches in the background. */
 export function ProgressBar({ active }: { active: boolean }) {
   return (
     <div

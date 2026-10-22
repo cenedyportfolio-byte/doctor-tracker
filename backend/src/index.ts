@@ -16,7 +16,6 @@ async function main() {
       await disconnectDatabase();
       process.exit(0);
     });
-    // Force exit if connections don't drain in time.
     setTimeout(() => process.exit(1), 10_000).unref();
   };
 

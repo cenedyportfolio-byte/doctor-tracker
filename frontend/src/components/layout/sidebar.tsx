@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Logo } from "./logo";
 import { NavLinks } from "./nav";
 
-/** Fixed sidebar on large screens; on smaller screens the top bar opens the same links in a drawer. */
 export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-56 flex-col border-r border-border bg-surface lg:flex">

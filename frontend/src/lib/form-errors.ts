@@ -2,10 +2,6 @@ import type { FieldValues, Path, UseFormSetError } from "react-hook-form";
 import { toast } from "sonner";
 import { ApiError, errorMessage } from "./api-client";
 
-/**
- * Maps API validation/conflict errors onto form fields (e.g. 409 "email already in use"
- * appears under the email input). Anything that can't be attached to a field becomes a toast.
- */
 export function handleFormError<T extends FieldValues>(
   error: unknown,
   setError: UseFormSetError<T>,

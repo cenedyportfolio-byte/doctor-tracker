@@ -5,21 +5,15 @@ import { cn } from "@/lib/utils";
 import { controlStyles } from "./input";
 
 interface SearchInputProps {
-  /** Initial value. Remount with a new `key` to reset it from outside. */
   defaultValue?: string;
   onSearch: (value: string) => void;
   placeholder?: string;
   label?: string;
   delay?: number;
-  /** Shorter input is not searched (the API ignores 1-character terms too). */
   minLength?: number;
   className?: string;
 }
 
-/**
- * Keeps keystrokes in local state and only reports the value after the user pauses typing,
- * so a fast typist triggers one request instead of one per character.
- */
 export function SearchInput({
   defaultValue = "",
   onSearch,

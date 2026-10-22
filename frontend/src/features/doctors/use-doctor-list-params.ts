@@ -5,7 +5,6 @@ import type { DoctorListParams, DoctorSort } from "./types";
 
 const SORT_VALUES = DOCTOR_SORTS.map((s) => s.value);
 
-/** Doctor list state, parsed from (and written to) the URL query string. */
 export function useDoctorListParams() {
   const { searchParams, update, reset } = useUrlState();
 

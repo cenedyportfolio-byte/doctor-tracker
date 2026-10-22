@@ -5,7 +5,6 @@ import { cn, formatNumber } from "@/lib/utils";
 import type { PageMeta } from "@/types/api";
 import { Button } from "./button";
 
-/** Page numbers with ellipses: 1 … 4 5 6 … 20 */
 function pageItems(page: number, totalPages: number): Array<number | "gap"> {
   if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
   const pages = new Set([1, totalPages, page - 1, page, page + 1]);

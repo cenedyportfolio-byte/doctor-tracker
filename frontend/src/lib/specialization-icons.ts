@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import type { Specialization } from "./constants";
 
-/** One line icon per specialization, shown wherever a doctor's department gets an icon. */
 export const SPECIALIZATION_ICONS: Record<Specialization, LucideIcon> = {
   Cardiology: HeartPulse,
   Dermatology: Hand,

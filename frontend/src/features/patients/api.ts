@@ -13,7 +13,6 @@ import type { DataResponse, Paginated } from "@/types/api";
 import type { Patient, PatientInput, PatientListParams } from "./types";
 
 interface ListScope {
-  /** Lists a single doctor's patients via GET /doctors/:id/patients. */
   doctorId?: string;
 }
 
@@ -44,7 +43,6 @@ export function usePatients(params: PatientListParams, scope: ListScope = {}) {
   return query;
 }
 
-/** Every view a patient write can change: lists, doctor counts/profiles, and the dashboard. */
 function useInvalidatePatientData() {
   const queryClient = useQueryClient();
   return () =>
@@ -56,7 +54,6 @@ function useInvalidatePatientData() {
     ]);
 }
 
-/** The form edits a calendar day; a same-day admission keeps the current time so ordering stays exact. */
 function admissionTimestamp(day: string | undefined): string | undefined {
   if (!day) return undefined;
   return day === toDateInputValue() ? new Date().toISOString() : dayStartIso(day);
@@ -70,7 +67,6 @@ export function useCreatePatient() {
   const invalidate = useInvalidatePatientData();
   return useMutation({
     mutationFn: ({ doctor, ...input }: PatientInput) =>
-      // Created through the nested resource, so the doctor comes from the URL.
       api<DataResponse<Patient>>(`/doctors/${doctor}/patients`, { method: "POST", body: toBody(input) }).then(
         (r) => r.data,
       ),

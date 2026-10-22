@@ -9,7 +9,6 @@ import { useCurrentUser, useLogout } from "@/features/auth/api";
 import { Logo } from "./logo";
 import { NavLinks } from "./nav";
 
-/** Slim bar above the content: the signed-in user and logout (plus the menu button on small screens). */
 export function TopBar() {
   const user = useCurrentUser();
   const logout = useLogout();

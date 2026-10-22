@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { useCurrentUser, useLogout } from "@/features/auth/api";
+import { Logo } from "./logo";
 import { NavLinks } from "./nav";
 
 /** Slim bar above the content: the signed-in user and logout (plus the menu button on small screens). */
@@ -20,8 +21,8 @@ export function TopBar() {
         <Button variant="ghost" size="icon" onClick={() => setMenuOpen(true)} aria-label="Open menu">
           <Menu className="size-5" />
         </Button>
-        <Link href="/dashboard" className="text-sm font-semibold text-foreground">
-          Doctor Tracker
+        <Link href="/dashboard" className="rounded-lg">
+          <Logo />
         </Link>
       </div>
 
